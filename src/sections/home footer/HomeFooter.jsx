@@ -1,9 +1,10 @@
+import logo from "../../assets/logo.svg";
 export default function HomeFooter() {
     return (
         <footer className="w-full text-green-800 py-2 border-t border-green-800/20">
             <div className="container mx-auto text-center">
                 <img
-                    src="/logo.svg"
+                    src={logo}
                     alt="Natural Feeder PH"
                     loading="eager"
                     className="h-auto w-12 mx-auto mb-2"
