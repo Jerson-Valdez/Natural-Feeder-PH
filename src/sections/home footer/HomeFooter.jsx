@@ -1,4 +1,4 @@
-import { logo } from "../../assets/Logo.svg";
+import logo from "../../assets/Logo.svg";
 export default function HomeFooter() {
     return (
         <footer className="w-full text-green-800 py-2 border-t border-green-800/20">
