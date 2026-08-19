@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.svg";
+import { logo } from "../../assets/Logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
 
 export default function Header({ basketCount = 0 }) {
