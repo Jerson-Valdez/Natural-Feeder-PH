@@ -1,4 +1,3 @@
-import logo from "../../../public/logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
 
 export default function Header({ basketCount = 0 }) {
@@ -9,7 +8,7 @@ export default function Header({ basketCount = 0 }) {
     >
       <div className="flex flex-row items-center gap-2">
         <img
-          src={logo}
+          src="/logo.svg"
           alt="Natural Feeder PH"
           loading="eager"
           className="h-auto w-12"
