@@ -24,7 +24,7 @@ export default function Nav() {
   return (
     <nav
       className="fixed bottom-3 left-1/2 z-50 flex h-16 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 flex-row items-center justify-between rounded-full bg-white/40 px-2 shadow-lg backdrop-blur-sm transition-all duration-300
-            lg:bottom-0 lg:left-0 lg:top-0 lg:h-screen lg:w-24 lg:-translate-x-0 lg:flex-col lg:justify-start lg:py-20 lg:gap-2 lg:bg-green-800 lg:rounded-l-none lg:px-0 lg:pr-1 lg:shadow-2xl"
+            lg:bottom-0 lg:left-0 lg:top-0 lg:h-screen lg:w-24 lg:-translate-x-0 lg:flex-col lg:justify-start lg:py-20 lg:gap-2 lg:bg-green-800 lg:rounded-l-none lg:px-0 lg:pr-1"
     >
       {navLink.map((link, index) => (
         <NavLink
