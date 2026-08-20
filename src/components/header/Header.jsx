@@ -1,7 +1,10 @@
 import logo from "../../assets/Logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
+import CartDialog from "../dialogs/CartDialog";
+import { useState } from "react";
 
-export default function Header({ basketCount = 0 }) {
+export default function Header({ basketCount = 2, setIsCartOpen, isCartOpen }) {
+
   return (
     <header
       className="fixed top-4 left-1/2 z-51 px-4 flex h-12 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 flex-row items-center justify-between rounded-full border-b border-white/20 bg-white/40 shadow-lg backdrop-blur-sm"
@@ -18,14 +21,14 @@ export default function Header({ basketCount = 0 }) {
           Natural Feeder <span className="text-amber-900">PH</span>
         </h1>
       </div>
-      <div className="flex flex-row items-center gap-2 text-green-800 relative">
+      <button className={`flex flex-row items-center gap-2 p-2 rounded-full text-green-800 relative cursor-pointer active:scale-95 active:bg-green-800 active:text-white transition-all duration-150 ${isCartOpen ? "bg-green-800 text-white" : "hover:bg-green-800/20"}`} onClick={() => setIsCartOpen(!isCartOpen)}>
         <IconShoppingBag size={24} />
         {basketCount > 0 && (
-          <span className="font-semibold text-xs absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
+          <span className="font-semibold text-xs absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
             {basketCount}
           </span>
         )}
-      </div>
+      </button>
     </header>
   );
 }
