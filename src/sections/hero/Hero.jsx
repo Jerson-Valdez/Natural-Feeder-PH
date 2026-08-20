@@ -23,18 +23,18 @@ export default function Hero() {
           description="Paombong, Bulacan · Premium feeder insects"
           color="green"
         />
-        <h1 className="text-5xl font-black text-center text-green-800">
+        <h1 className="text-4xl font-black text-center text-green-800 lg:text-6xl">
           Fresh Feeders,
         </h1>
-        <h1 className="text-5xl font-black text-center text-amber-900">
+        <h1 className="text-4xl font-black text-center text-amber-900 lg:text-6xl">
           Straight to You
         </h1>
-        <p className="text-base text-amber-900">
+        <p className="text-base text-amber-900 text-center lg:text-left lg:text-lg">
           <strong>Welcome to Natural Feeder PH.</strong> Order superworms from
           Paombong, Bulacan. — browse today's prices, add to your basket, and
           send your order directly on Messenger.
         </p>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 py-4">
           <PrimaryButtonLink
             to="/order-now"
             icon={<IconArchiveFilled size={20} />}
@@ -47,7 +47,7 @@ export default function Hero() {
             isHash={true}
           />
         </div>
-        <div className="flex flex-row flex-wrap gap-2 justify-center min-sm:justify-start">
+        <div className="flex flex-row flex-wrap gap-4 justify-center min-sm:justify-start">
           <div className="flex flex-row items-center gap-2 text-green-800 text-xs font-semibold">
             <IconCircleFilled size={8} />
             Farm-fresh stock
