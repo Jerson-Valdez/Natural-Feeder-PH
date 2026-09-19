@@ -8,6 +8,7 @@ import HomeFooter from "./sections/home footer/HomeFooter";
 import CartDialog from "./components/dialogs/CartDialog";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import OrderNow from "./pages/order_now/OrderNow";
 
 function App() {
   useEffect(() => {
@@ -55,6 +56,8 @@ function App() {
       <CartDialog isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} data={cartData} removeFromCart={removeFromCart} />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/order-now" element={<OrderNow />} />
+        <Route path="*" element={<Home />} />
       </Routes>
       <HomeFooter />
     </BrowserRouter>
