@@ -4,11 +4,11 @@ import "./App.css";
 import Home from "./pages/home/Home";
 import Header from "./components/header/Header";
 import Nav from "./components/nav/Nav";
-import HomeFooter from "./sections/home footer/HomeFooter";
 import CartDialog from "./components/dialogs/CartDialog";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import OrderNow from "./pages/order_now/OrderNow";
+import OrderHistory from "./pages/order_history/OrderHistory";
 
 function App() {
   useEffect(() => {
@@ -55,11 +55,17 @@ function App() {
       <Nav />
       <CartDialog isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} data={cartData} removeFromCart={removeFromCart} />
       <Routes>
+        {/* public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/order-now" element={<OrderNow />} />
+        <Route path="/order-history" element={<OrderHistory />} />
+
+        {/* private routes */}
+
+
+        {/* fallback route */}
         <Route path="*" element={<Home />} />
       </Routes>
-      <HomeFooter />
     </BrowserRouter>
   );
 }

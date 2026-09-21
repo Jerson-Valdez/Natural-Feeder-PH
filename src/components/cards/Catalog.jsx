@@ -1,6 +1,7 @@
 import PrimaryButton from "../buttons/PrimaryButton";
 import { useState } from "react";
-import { IconArchiveFilled } from '@tabler/icons-react';
+import { IconShoppingBag } from '@tabler/icons-react';
+import SecondaryButton from "../buttons/SecondaryButton";
 
 export default function Catalog({
   productImage,
@@ -16,7 +17,7 @@ export default function Catalog({
   const totalPrice = selectedBundle ? selectedBundle.price * counter : 0;
 
   return (
-    <div className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl">
+    <div className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl" data-aos="fade-right">
       
       {/* Product Image */}
       <img className="w-full h-52 object-cover" src={productImage} alt={productName} />
@@ -29,7 +30,7 @@ export default function Catalog({
             {productDescription}
           </p>
           <span className="text-green-700 font-semibold text-xs mt-2 bg-green-50 w-fit px-2 py-1 rounded-md">
-            Freebies: {productFreebies}
+            Freebies: {productFreebies} per 1000 pcs
           </span>
         </div>
 
@@ -82,7 +83,7 @@ export default function Catalog({
           </span>
         </div>
 
-        <div className="flex flex-row items-center justify-between gap-3">
+        <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex flex-row items-center bg-white border border-gray-300 rounded-lg h-12 overflow-hidden shadow-sm flex-1 max-w-3xs">
             <button
               className="w-16 h-full text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
@@ -108,20 +109,35 @@ export default function Catalog({
             </button>
           </div>
           {totalPrice > 0 ? (
-            <PrimaryButton
-              icon={<IconArchiveFilled size={18} />}
-              text="Add to Cart" 
+            <>
+              <SecondaryButton
+              icon={<IconShoppingBag size={18} />}
+              text="" 
               action={() => {
                 if (!selectedBundle) alert("Please select a size first!");
                 else alert(`Added ${counter} lot(s) of ${selectedBundle.size} to cart!`);
               }}
             />
-          ) : (
             <PrimaryButton
-              icon={<IconArchiveFilled size={18} />}
-              text="Add to Cart"
+              text="Order Now" 
+              action={() => {
+                if (!selectedBundle) alert("Please select a size first!");
+                else alert(`Added ${counter} lot(s) of ${selectedBundle.size} to cart!`);
+              }}
+            />
+            </>
+          ) : (
+            <>
+              <SecondaryButton
+              icon={<IconShoppingBag size={18} />}
+              text=""
               isDisabled={true}
             />
+            <PrimaryButton
+              text="Order Now"
+              isDisabled={true}
+            />
+            </>
           )}
         </div>
       </div>
