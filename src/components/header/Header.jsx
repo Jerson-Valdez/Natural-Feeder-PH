@@ -1,7 +1,5 @@
 import logo from "../../assets/Logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
-import CartDialog from "../dialogs/CartDialog";
-import { useState } from "react";
 
 export default function Header({ basketCount = 2, setIsCartOpen, isCartOpen }) {
 
