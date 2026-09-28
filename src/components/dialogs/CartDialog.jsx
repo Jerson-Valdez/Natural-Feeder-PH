@@ -3,8 +3,13 @@ import CartItemCard from "../cards/CartItemCard";
 import PrimaryButton from "../buttons/PrimaryButton";
 import { useState } from "react";
 
-export default function CartDialog({ isOpen, onClose, data, removeFromCart }) {
+import { useContext } from "react";
+import { CartContext } from "../../context/CartContext";
+import PrimaryButtonLink from "../buttons/PrimaryButtonLink";
 
+export default function CartDialog({ isOpen, onClose }) {
+
+  const { cart, removeFromCart } = useContext(CartContext);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const toggleSelect = (id) => {
@@ -16,7 +21,7 @@ export default function CartDialog({ isOpen, onClose, data, removeFromCart }) {
     });
   };
 
-  const totalPrice = data
+  const totalPrice = cart
     .filter((item) => selectedItems.includes(item.id))
     .reduce((total, item) => total + item.price, 0);
 
@@ -48,12 +53,15 @@ export default function CartDialog({ isOpen, onClose, data, removeFromCart }) {
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col items-center justify-start text-center gap-3 pt-2">
-          {data.length === 0 ? (
-            <p className="text-gray-500 text-sm font-medium pt-10">
-              Your cart is currently empty.
-            </p>
+          {cart.length === 0 ? (
+            <>
+              <p className="text-gray-500 text-sm font-medium pt-10">
+                Your cart is currently empty.
+              </p>
+              <PrimaryButtonLink text="Order Now" to="/order-now" />
+            </>
           ) : (
-            data.map((item) => (
+            cart.map((item) => (
               <CartItemCard
                 key={item.id}
                 item={item}

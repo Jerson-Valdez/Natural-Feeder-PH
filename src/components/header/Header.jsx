@@ -1,7 +1,11 @@
 import logo from "../../assets/Logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
 
-export default function Header({ basketCount = 2, setIsCartOpen, isCartOpen }) {
+import { useContext } from "react";
+import { CartContext } from "../../context/CartContext";
+
+export default function Header({ setIsCartOpen, isCartOpen }) {
+  const { cart } = useContext(CartContext);
 
   return (
     <header
@@ -21,9 +25,9 @@ export default function Header({ basketCount = 2, setIsCartOpen, isCartOpen }) {
       </div>
       <button className={`flex flex-row items-center gap-2 p-2 rounded-full text-green-800 relative cursor-pointer active:scale-95 active:bg-green-800 active:text-white transition-all duration-150 ${isCartOpen ? "bg-green-800 text-white" : "hover:bg-green-800/20"}`} onClick={() => setIsCartOpen(!isCartOpen)}>
         <IconShoppingBag size={24} />
-        {basketCount > 0 && (
+        {cart.length > 0 && (
           <span className="font-semibold text-xs absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
-            {basketCount}
+            {cart.length}
           </span>
         )}
       </button>

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
+import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
+
 export default function OrderNow() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +40,24 @@ export default function OrderNow() {
 
   if (isLoading) {
     return (
-      <div className="flex w-full h-screen items-center justify-center">
-        <p className="text-green-800 font-bold animate-pulse">
-          Loading Live Stock...
+      <main className="page-container">
+      <div className="flex flex-col items-center justify-center gap-2 text-center">
+        <h1 className="text-2xl font-bold text-green-800">
+          Make Your Order Now
+        </h1>
+        <p className="text-sm text-gray-600">
+          Browse our catalog, build your order, and send it straight to our
+          Messenger in seconds.
         </p>
       </div>
-    );
-  }
+      <div className="flex flex-col md:flex-row w-full items-center justify-start gap-4 mt-4">
+        {[1, ].map((skeletonId) => (
+            <CatalogSkeleton key={skeletonId} />
+          ))}
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="page-container">
