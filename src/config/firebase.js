@@ -1,7 +1,11 @@
 import { initializeApp } from "firebase/app";
 // Import the specific services you need
-import { getFirestore } from "firebase/firestore"; 
 import { getAuth } from "firebase/auth";
+import { 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
+} from "firebase/firestore";
 
 // Use import.meta.env to securely pull the keys in Vite
 const firebaseConfig = {
@@ -17,5 +21,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize and export the services so your React components can use them
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
+
 export const auth = getAuth(app);

@@ -1,7 +1,13 @@
 import PrimaryButton from "../buttons/PrimaryButton";
 import { useState } from "react";
-import { IconShoppingBag } from '@tabler/icons-react';
+import { IconShoppingBag } from "@tabler/icons-react";
 import SecondaryButton from "../buttons/SecondaryButton";
+
+import { useContext } from "react";
+import { CartContext } from "../../context/CartContext";
+
+//toast
+import { toast } from "sonner";
 
 export default function Catalog({
   productImage,
@@ -10,18 +16,26 @@ export default function Catalog({
   productBundleInfo,
   productFreebies,
 }) {
+  const { addToCart } = useContext(CartContext);
+
   const [selectedBundle, setSelectedBundle] = useState(null);
-  
+
   const [counter, setCounter] = useState(1);
 
   const totalPrice = selectedBundle ? selectedBundle.price * counter : 0;
 
   return (
-    <div className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl" data-aos="fade-right">
-      
+    <div
+      className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl"
+      data-aos="fade-right"
+    >
       {/* Product Image */}
-      <img className="w-full h-52 object-cover" src={productImage} alt={productName} />
-      
+      <img
+        className="w-full h-52 object-cover"
+        src={productImage}
+        alt={productName}
+      />
+
       {/* Top Content */}
       <div className="flex flex-col w-full gap-2 px-5 py-4">
         <div className="flex flex-col">
@@ -37,35 +51,42 @@ export default function Catalog({
         {/* CUSTOM STYLED RADIO BUTTONS */}
         <div className="flex flex-row gap-2 mt-2">
           {productBundleInfo.map((bundle, index) => {
-
             const isSelected = selectedBundle?.size === bundle.size;
-            
+
             return (
-              <label 
-                key={index} 
+              <label
+                key={index}
                 className={`relative flex flex-1 flex-row items-center justify-between p-2 rounded-xl border cursor-pointer transition-all ${
-                  isSelected 
-                    ? "border-green-800 bg-green-50 ring-1 ring-green-800" 
+                  isSelected
+                    ? "border-green-800 bg-green-50 ring-1 ring-green-800"
                     : "border-gray-200 bg-white hover:border-green-800/40 hover:bg-gray-50"
                 }`}
               >
-                <input 
-                  type="radio" 
-                  name={productName} 
+                <input
+                  type="radio"
+                  name={productName}
                   value={bundle.size}
                   className="hidden"
+                  checked={isSelected}
                   onChange={() => setSelectedBundle(bundle)}
                 />
-                
+
                 <div className="flex flex-col">
-                  <span className={`font-bold text-[10px] md:text-xs ${isSelected ? "text-green-900" : "text-gray-700"}`}>
+                  <span
+                    className={`font-bold text-[10px] md:text-xs ${isSelected ? "text-green-900" : "text-gray-700"}`}
+                  >
                     {bundle.size}
                   </span>
-                  <p className={`font-black text-xs ${isSelected ? "text-green-800" : "text-gray-600"}`}>
-                  ₱{bundle.price}<span className="text-gray-500 font-normal text-[10px] md:text-xs"> /{bundle.pieces} pcs </span>
-                </p>
+                  <p
+                    className={`font-black text-xs ${isSelected ? "text-green-800" : "text-gray-600"}`}
+                  >
+                    ₱{bundle.price}
+                    <span className="text-gray-500 font-normal text-[10px] md:text-xs">
+                      {" "}
+                      /{bundle.pieces} pcs{" "}
+                    </span>
+                  </p>
                 </div>
-                
               </label>
             );
           })}
@@ -74,10 +95,11 @@ export default function Catalog({
 
       {/* BOTTOM CONTROLS & PRICE */}
       <div className="w-full bg-gray-50 flex flex-col px-5 py-4 border-t border-gray-100">
-        
         {/* Dynamic Total Display */}
         <div className="flex flex-row items-center justify-between">
-          <span className="text-sm font-bold text-gray-500 uppercase">Total</span>
+          <span className="text-sm font-bold text-gray-500 uppercase">
+            Total
+          </span>
           <span className="text-2xl font-black text-green-800">
             ₱{totalPrice.toLocaleString("en-PH")}
           </span>
@@ -92,14 +114,14 @@ export default function Catalog({
             >
               -
             </button>
-            <input 
-              type="number" 
-              value={counter} 
+            <input
+              type="number"
+              value={counter}
               onChange={(e) => {
                 const val = parseInt(e.target.value);
                 setCounter(val > 0 ? val : 1);
-              }} 
-              className="w-full text-center font-bold text-gray-800 outline-none focus:bg-green-50" 
+              }}
+              className="w-full text-center font-bold text-gray-800 outline-none focus:bg-green-50"
             />
             <button
               className="w-16 h-full text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
@@ -111,32 +133,48 @@ export default function Catalog({
           {totalPrice > 0 ? (
             <>
               <SecondaryButton
-              icon={<IconShoppingBag size={18} />}
-              text="" 
-              action={() => {
-                if (!selectedBundle) alert("Please select a size first!");
-                else alert(`Added ${counter} lot(s) of ${selectedBundle.size} to cart!`);
-              }}
-            />
-            <PrimaryButton
-              text="Order Now" 
-              action={() => {
-                if (!selectedBundle) alert("Please select a size first!");
-                else alert(`Added ${counter} lot(s) of ${selectedBundle.size} to cart!`);
-              }}
-            />
+                icon={<IconShoppingBag size={18} />}
+                text=""
+                action={() => {
+                  const itemToSave = {
+                    id: productName + selectedBundle.size,
+                    name: productName,
+                    image: productImage,
+                    size: selectedBundle.size,
+                    price: selectedBundle.price,
+                    pieces: selectedBundle.pieces,
+                    freebies: productFreebies,
+                    quantity: counter,
+                  };
+
+                  addToCart(itemToSave);
+                  setCounter(1);
+                  setSelectedBundle(null);
+
+                  toast.success(`Added ${counter} of ${selectedBundle.size} ${productName} to cart!`, {
+                    description: "You can view your cart by clicking the cart icon.",
+                  });
+                }}
+              />
+              <PrimaryButton
+                text="Order Now"
+                action={() => {
+                  if (!selectedBundle) alert("Please select a size first!");
+                  else
+                    alert(
+                      `Added ${counter} lot(s) of ${selectedBundle.size} to cart!`,
+                    );
+                }}
+              />
             </>
           ) : (
             <>
               <SecondaryButton
-              icon={<IconShoppingBag size={18} />}
-              text=""
-              isDisabled={true}
-            />
-            <PrimaryButton
-              text="Order Now"
-              isDisabled={true}
-            />
+                icon={<IconShoppingBag size={18} />}
+                text=""
+                isDisabled={true}
+              />
+              <PrimaryButton text="Order Now" isDisabled={true} />
             </>
           )}
         </div>
