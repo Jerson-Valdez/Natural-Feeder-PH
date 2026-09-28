@@ -2,7 +2,7 @@ import { IconUserFilled, IconMapPinFilled , IconMessageCircleFilled, IconArchive
 
 export default function OrderHistoryCard({ orderId, orderDate, orderBy, orderLocation, orderVia, orderModeTransport, orderItems, orderTotal }) {
   return (
-    <div key={orderId} className="flex flex-col gap-2 w-full rounded-2xl p-3 shadow-md border cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 bg-white/80 border-white/40" data-aos="fade-right">
+    <div key={orderId} className="flex flex-col gap-2 w-full rounded-2xl p-3 shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-0.5 bg-white/80 border-white/40 transition-all duration-300">
       <div className="flex flex-row items-center justify-between">
         <div>
             <h2 className="font-bold text-green-800">Order #{orderId}</h2>
