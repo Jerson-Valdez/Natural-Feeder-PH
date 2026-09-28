@@ -1,11 +1,14 @@
+//components and assets
 import Catalog from "../../components/cards/Catalog";
 import superwormImg from "../../assets/catalogs/superworm.webp";
+import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
 
+//hooks
 import { useEffect, useState } from "react";
+
+//db
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
-
-import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
 
 export default function OrderNow() {
   const [products, setProducts] = useState([]);
@@ -30,6 +33,7 @@ export default function OrderNow() {
         setProducts(productsArray);
       } catch (error) {
         console.error("Error fetching products:", error);
+        toast.error("Failed to fetch products. Please try again later.");
       } finally {
         setIsLoading(false);
       }
