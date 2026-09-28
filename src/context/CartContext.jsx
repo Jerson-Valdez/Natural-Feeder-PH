@@ -23,9 +23,9 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCart((prevCart) => {
-      if (prevCart.some((item) => item.id === product.id)) {
+      if (prevCart.some((item) => item.name === product.name && item.size === product.size)) {
         return prevCart.map((item) =>
-          item.id === product.id
+          item.name === product.name && item.size === product.size
             ? { ...item, quantity: item.quantity + product.quantity }
             : item
         );

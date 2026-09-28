@@ -137,7 +137,7 @@ export default function Catalog({
                 text=""
                 action={() => {
                   const itemToSave = {
-                    id: productName + selectedBundle.size,
+                    id: new Date().getTime(),
                     name: productName,
                     image: productImage,
                     size: selectedBundle.size,
