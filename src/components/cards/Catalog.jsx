@@ -3,6 +3,7 @@ import { useState } from "react";
 import { IconShoppingBag } from "@tabler/icons-react";
 import SecondaryButton from "../buttons/SecondaryButton";
 
+//context
 import { useContext } from "react";
 import { CartContext } from "../../context/CartContext";
 
@@ -27,7 +28,6 @@ export default function Catalog({
   return (
     <div
       className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl"
-      data-aos="fade-right"
     >
       {/* Product Image */}
       <img
