@@ -3,6 +3,15 @@ export default function Status({ icon, description, color }) {
     case "green":
       color = "text-green-800 bg-green-800/20";
       break;
+    case "yellow":
+      color = "text-yellow-500 bg-yellow-500/20";
+      break;
+    case "red":
+      color = "text-red-800 bg-red-800/20";
+      break;
+    case "blue":
+      color = "text-blue-800 bg-blue-800/20";
+      break;
     default:
       color = "text-black bg-black/20";
       break;

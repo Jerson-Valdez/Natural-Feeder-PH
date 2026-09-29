@@ -1,11 +1,10 @@
-import { Link } from "react-router-dom";
 import {
   IconArchiveFilled,
   IconProgressHelp,
   IconBug,
   IconCircleFilled,
 } from "@tabler/icons-react";
-import hero from "../../assets/landing page assets/hero_img.jpg";
+import hero from "../../assets/landing page assets/hero_vid.mp4";
 import Status from "../../components/status/Status";
 import PrimaryButtonLink from "../../components/buttons/PrimaryButtonLink";
 import SecondaryButtonLink from "../../components/buttons/SecondaryButtonLink";
@@ -47,7 +46,7 @@ export default function Hero() {
             isHash={true}
           />
         </div>
-        <div className="flex flex-row flex-wrap gap-4 justify-center min-sm:justify-start">
+        <div className="flex flex-row flex-wrap gap-4 justify-center">
           <div className="flex flex-row items-center gap-2 text-green-800 text-xs font-semibold">
             <IconCircleFilled size={8} />
             Farm-fresh stock
@@ -62,10 +61,18 @@ export default function Hero() {
           </div>
         </div>
       </div>
-      <img
+      {/* <img
         src={hero}
         alt="Hero image"
         className="w-full rounded-xl min-md:w-1/2"
+      /> */}
+      <video
+        src={hero}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full rounded-xl min-md:w-1/2 outline-none border-none"
       />
     </section>
   );
