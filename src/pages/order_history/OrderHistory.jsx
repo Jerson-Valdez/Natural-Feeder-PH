@@ -10,96 +10,53 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 //db
-import { collection, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
+//context
+import { useContext } from "react";
+import { CartContext } from "../../context/CartContext";
+
 export default function OrderHistory() {
+  const { orderHistoryIds } = useContext(CartContext);
   const [orderHistory, setOrderHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrderHistory = async () => {
+    const fetchLiveOrders = async () => {
+      if (orderHistoryIds.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const querySnapshot = await getDocs(collection(db, "orderHistory"));
+        const fetchPromises = orderHistoryIds.map((id) =>
+          getDoc(doc(db, "orders", id)),
+        );
 
-        const orderHistoryArray = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const documentSnapshots = await Promise.all(fetchPromises);
 
-        if (orderHistoryArray.length === 0) {
-          toast.info("No order history found.");
-          setOrderHistory([{
-        id: 1,
-        date: "2023-01-01",
-        orderBy: "John Doe",
-        location: "Paombong, Bulacan",
-        via: "Messenger",
-        modeTransport: "Pickup",
-        items: [
-          {
-            id: 1,
-            name: "Superworm",
-            size: "small-medium",
-            quantity: 1,
-            pieces: 1000,
-            freebies: 100,
-            price: 300,
-          },
-          {
-            id: 2,
-            name: "Superworm",
-            size: "large-extra large",
-            quantity: 1,
-            pieces: 1000,
-            freebies: 100,
-            price: 200,
-          },
-        ],
-        total: 300,
-      },
-      {
-        id: 1,
-        date: "2023-01-01",
-        orderBy: "John Doe",
-        location: "Paombong, Bulacan",
-        via: "Messenger",
-        modeTransport: "Pickup",
-        items: [
-          {
-            id: 1,
-            name: "Superworm",
-            size: "small-medium",
-            quantity: 1,
-            pieces: 1000,
-            freebies: 100,
-            price: 300,
-          },
-          {
-            id: 2,
-            name: "Superworm",
-            size: "large-extra large",
-            quantity: 1,
-            pieces: 1000,
-            freebies: 100,
-            price: 200,
-          },
-        ],
-        total: 300,
-      },]);
-        } else {
-          setOrderHistory(orderHistoryArray);
-        }
+        const ordersData = documentSnapshots
+          .filter((docSnap) => docSnap.exists())
+          .map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+          }));
+
+        ordersData.sort(
+          (a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis(),
+        );
+
+        setOrderHistory(ordersData);
       } catch (error) {
         console.error("Error fetching order history:", error);
-        toast.error("Failed to fetch order history. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchOrderHistory();
-  }, []);
+    fetchLiveOrders();
+  }, [orderHistoryIds]);
 
   if (isLoading) {
     return (
@@ -114,7 +71,7 @@ export default function OrderHistory() {
           </p>
         </div>
         <div className="flex flex-col w-full items-center justify-start gap-4 mt-4">
-            <p className="text-gray-600 w-full">{orderHistory.length} orders</p>
+          <p className="text-gray-600 w-full">{orderHistory.length} orders</p>
           {[1, 2, 3].map((skeletonId) => (
             <OrderHistorySkeleton key={skeletonId} />
           ))}
@@ -149,13 +106,24 @@ export default function OrderHistory() {
             <OrderHistoryCard
               key={order.id}
               orderId={order.id}
-              orderDate={order.date}
+              createdAt={
+                order.createdAt
+                  ? order.createdAt.toDate().toLocaleString("en-PH", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "Just now"
+              }
               orderBy={order.orderBy}
-              orderLocation={order.location}
-              orderVia={order.via}
-              orderModeTransport={order.modeTransport}
+              orderLocation={order.orderLocation}
+              orderVia={order.orderVia}
+              orderModeTransport={order.orderModeTransport}
               orderItems={order.items}
-              orderTotal={order.total}
+              orderTotal={order.totalPrice}
+              status={order.status}
             />
           ))
         )}

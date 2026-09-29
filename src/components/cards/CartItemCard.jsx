@@ -1,5 +1,5 @@
 import { IconTrash, IconSquareRoundedCheckFilled, IconSquareRounded } from "@tabler/icons-react";
-import Superworm from "../../assets/catalogs/superworm.webp";
+import Superworm from "../../assets/catalogs/superworm.jpg";
 import { useNavigate } from "react-router-dom";
 
 //context

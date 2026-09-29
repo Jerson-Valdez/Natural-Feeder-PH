@@ -1,6 +1,6 @@
 //components and assets
 import Catalog from "../../components/cards/Catalog";
-import superwormImg from "../../assets/catalogs/superworm.webp";
+import superwormImg from "../../assets/catalogs/superworm.jpg";
 import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
 
 //hooks
@@ -54,7 +54,7 @@ export default function OrderNow() {
           Messenger in seconds.
         </p>
       </div>
-      <div className="flex flex-col md:flex-row w-full items-center justify-start gap-4 mt-4">
+      <div className="flex flex-col lg:flex-row w-full items-center justify-start gap-4 mt-4">
         {[1, ].map((skeletonId) => (
             <CatalogSkeleton key={skeletonId} />
           ))}

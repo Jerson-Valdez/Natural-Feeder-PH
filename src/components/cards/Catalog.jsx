@@ -1,7 +1,13 @@
+//components
 import PrimaryButton from "../buttons/PrimaryButton";
-import { useState } from "react";
-import { IconShoppingBag } from "@tabler/icons-react";
 import SecondaryButton from "../buttons/SecondaryButton";
+import CheckoutDialog from "../dialogs/CheckoutDialog";
+
+//hooks
+import { useState } from "react";
+
+//icons
+import { IconShoppingBag } from "@tabler/icons-react";
 
 //context
 import { useContext } from "react";
@@ -19,6 +25,8 @@ export default function Catalog({
 }) {
   const { addToCart } = useContext(CartContext);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [selectedBundle, setSelectedBundle] = useState(null);
 
   const [counter, setCounter] = useState(1);
@@ -26,12 +34,10 @@ export default function Catalog({
   const totalPrice = selectedBundle ? selectedBundle.price * counter : 0;
 
   return (
-    <div
-      className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl"
-    >
+    <div className="w-full max-w-sm flex flex-col items-center justify-start shadow-lg rounded-2xl bg-white overflow-hidden transition-all hover:shadow-xl">
       {/* Product Image */}
       <img
-        className="w-full h-52 object-cover"
+        className="w-full h-62 object-cover hover:scale-105 transition-transform duration-300"
         src={productImage}
         alt={productName}
       />
@@ -137,7 +143,7 @@ export default function Catalog({
                 text=""
                 action={() => {
                   const itemToSave = {
-                    id: new Date().getTime(),
+                    id: productName + selectedBundle.size,
                     name: productName,
                     image: productImage,
                     size: selectedBundle.size,
@@ -151,20 +157,40 @@ export default function Catalog({
                   setCounter(1);
                   setSelectedBundle(null);
 
-                  toast.success(`Added ${counter} of ${selectedBundle.size} ${productName} to cart!`, {
-                    description: "You can view your cart by clicking the cart icon.",
-                  });
+                  toast.success(
+                    `Added ${counter} of ${selectedBundle.size} ${productName} to cart!`,
+                    {
+                      description:
+                        "You can view your cart by clicking the cart icon.",
+                    },
+                  );
                 }}
               />
               <PrimaryButton
                 text="Order Now"
                 action={() => {
-                  if (!selectedBundle) alert("Please select a size first!");
-                  else
-                    alert(
-                      `Added ${counter} lot(s) of ${selectedBundle.size} to cart!`,
-                    );
+                  setIsDialogOpen(true);
                 }}
+              />
+              <CheckoutDialog
+                items={
+                  selectedBundle
+                    ? [
+                        {
+                          id: productName + selectedBundle.size,
+                          name: productName,
+                          size: selectedBundle.size,
+                          price: selectedBundle.price,
+                          pieces: selectedBundle.pieces,
+                          freebies: productFreebies,
+                          quantity: counter,
+                        },
+                      ]
+                    : []
+                }
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                from="catalog"
               />
             </>
           ) : (
