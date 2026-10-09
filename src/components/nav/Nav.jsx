@@ -1,3 +1,4 @@
+
 import {
   IconHomeFilled,
   IconArchiveFilled,
@@ -6,63 +7,128 @@ import {
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
 
-export default function Nav() {
-  const navLink = [
-    { name: "Home", to: "/", icon: <IconHomeFilled size={24} /> },
-    {
-      name: "Order Now",
-      to: "/order-now",
-      icon: <IconArchiveFilled size={24} />,
-    },
-    {
-      name: "Order History",
-      to: "/order-history",
-      icon: <IconClipboardListFilled size={24} />,
-    },
-  ];
+const navLinks = [
+  { name: "Home", to: "/", icon: IconHomeFilled },
+  { name: "Order Now", to: "/order-now", icon: IconArchiveFilled },
+  {
+    name: "Order History",
+    to: "/order-history",
+    icon: IconClipboardListFilled,
+  },
+];
 
+export default function Nav() {
   return (
     <nav
-      className="fixed bottom-3 left-1/2 z-50 flex h-16 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 flex-row items-center justify-between rounded-full bg-white/40 px-2 shadow-lg backdrop-blur-sm transition-all duration-300
-            lg:bottom-0 lg:left-0 lg:top-0 lg:h-screen lg:w-24 lg:-translate-x-0 lg:flex-col lg:justify-start lg:py-20 lg:gap-2 lg:bg-green-800 lg:rounded-l-none lg:px-0 lg:pr-1"
-    >
-      {navLink.map((link, index) => (
-        <NavLink
-          key={index}
-          to={link.to}
-          className={({ isActive }) =>
-            `group flex flex-row lg:flex-col items-center justify-center gap-1 rounded-full transition-all duration-300 lg:w-full lg:rounded-l-none lg:flex-none lg:py-4 ${
-              isActive
-                ? "bg-green-800 text-white flex-auto h-12 px-5 lg:h-auto lg:px-2 lg:bg-white lg:text-green-800"
-                : "text-green-800 flex-1 h-12 lg:hover:text-green-800 hover:bg-white lg:w-14 lg:h-auto lg:text-white"
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              {link.icon}
-              <span
-                className={`text-xs text-center font-semibold overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                  isActive ? "block" : "hidden lg:group-hover:block"
-                }`}
-              >
-                {link.name}
-              </span>
-            </>
-          )}
-        </NavLink>
-      ))}
+      className="
+        fixed bottom-3 left-1/2 z-50
+        flex h-16 w-[calc(100%-2rem)] max-w-md
+        -translate-x-1/2 items-center gap-1
+        rounded-full bg-white/40 p-2 shadow-lg
+        backdrop-blur-sm
 
-      <div className="hidden lg:flex flex-col text-white items-center gap-2 mt-auto">
-        <p className="text-sm font-semibold tracking-wide">Visit Us</p>
+        lg:bottom-auto lg:left-4 lg:top-1/2
+        lg:h-[90vh] lg:w-18
+        lg:-translate-y-1/2 lg:translate-x-0
+        lg:flex-col lg:justify-start lg:gap-2
+        lg:bg-green-800
+        lg:rounded-full
+        lg:px-2 lg:py-8
+      "
+    >
+
+      {/* <div className="hidden h-14 w-full shrink-0 items-center justify-center lg:flex">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-800 text-xl font-bold text-white">
+          NF
+        </div>
+      </div> */}
+
+      <div className="flex w-full items-center justify-between gap-1 lg:flex-col lg:justify-start lg:gap-2">
+        {navLinks.map(({ name, to, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === "/"}
+            className={({ isActive }) =>
+              `
+                group relative flex h-12 min-w-0 items-center
+                justify-center gap-2 rounded-full
+                transition-colors duration-200
+
+                lg:h-12 lg:w-full lg:flex-none lg:gap-0
+                lg:rounded-2xl
+
+                ${
+                  isActive
+                    ? "flex-[1.5] bg-green-800 px-3 text-white lg:text-green-800 lg:bg-white"
+                    : "flex-1 px-1 text-neutral-600 hover:bg-green-50 lg:px-0 lg:text-neutral-300 lg:hover:bg-green-900 lg:hover:text-white"
+                }
+              `
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Icon
+                  size={24}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
+
+                <span
+                  className={`
+                    min-w-0 truncate text-xs font-semibold
+                    ${isActive ? "block" : "hidden"}
+                    lg:hidden
+                  `}
+                >
+                  {name}
+                </span>
+
+                <div
+                  className="
+                    pointer-events-none absolute
+                    left-[calc(100%+12px)] top-1/2
+                    z-[100] hidden -translate-y-1/2
+                    whitespace-nowrap rounded-2xl
+                    bg-green-900 px-5 py-3.5
+                    text-sm font-medium text-white
+                    shadow-xl
+
+                    lg:block lg:invisible lg:opacity-0
+                    lg:translate-x-1
+                    lg:transition-all lg:duration-200
+                    lg:group-hover:visible
+                    lg:group-hover:translate-x-0
+                    lg:group-hover:opacity-100
+                  "
+                >
+                  {name}
+                </div>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
+
+      <div className="mt-auto hidden w-full flex-col items-center gap-3 lg:flex">
         <a
           href="https://www.facebook.com/NaturalFeederPH"
           target="_blank"
-          rel="noreferrer"
-          className="flex flex-row border border-white shadow-lg p-3 rounded-2xl hover:bg-blue-800/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+          rel="noopener noreferrer"
+          aria-label="Visit us on Facebook"
+          className="
+            flex h-12 w-full items-center justify-center
+            rounded-2xl text-white
+            transition-colors hover:bg-blue-600
+            hover:text-white
+          "
         >
           <IconBrandFacebookFilled size={24} />
         </a>
+
+        <span className="text-[10px] font-medium text-white">
+          Visit Us
+        </span>
       </div>
     </nav>
   );

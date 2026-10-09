@@ -9,6 +9,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import OrderNow from "./pages/order_now/OrderNow";
 import OrderHistory from "./pages/order_history/OrderHistory";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
   useEffect(() => {
@@ -23,26 +24,7 @@ function App() {
   }, []);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartData, setCartData] = useState([
-    {
-      id: 1,
-      name: "Superworm",
-      size: "small-medium",
-      pieces: 1000,
-      freebies: 100,
-      price: 300,
-      image: "/path/to/image1.jpg"
-    },
-    {
-      id: 2,
-      name: "Superworm",
-      price: 200,
-      size: "large-extra large",
-      pieces: 1000,
-      freebies: 100,
-      image: "/path/to/image2.jpg"
-    }
-  ]);
+  const [cartData, setCartData] = useState([]);
 
   function removeFromCart(itemId) {
     const updatedCart = cartData.filter((item) => item.id !== itemId);
@@ -61,7 +43,7 @@ function App() {
         <Route path="/order-history" element={<OrderHistory />} />
 
         {/* private routes */}
-
+        <Route path="/admin" element={<AdminDashboard />} />
 
         {/* fallback route */}
         <Route path="*" element={<Home />} />
