@@ -19,28 +19,28 @@ export default function DashboardCard({ title, value, icon: Icon, color, isValue
 
   switch (borderColor){
     case "blue":
-      borderColor = "border-blue-500";
+      borderColor = "border-b-blue-500";
       break
     case "green":
-      borderColor = "border-green-500";
+      borderColor = "border-b-green-500";
       break
     case "red":
-      borderColor = "border-red-500";
+      borderColor = "border-b-red-500";
       break
     case "yellow":
-      borderColor = "border-yellow-500";
+      borderColor = "border-b-yellow-500";
       break
     default:
-      borderColor = "border-gray-500";
+      borderColor = "border-b-gray-500";
   }
 
   return (
-    <div className={`flex-1 flex flex-row w-1/3 items-start justify-between gap-2 text-center rounded-2xl p-4 shadow-lg border-b-2 ${borderColor} lg:min-w-2xs bg-white`}>
+    <div className={`flex-1 flex flex-row w-1/3 items-start justify-between gap-2 text-center rounded-2xl p-4 shadow-md border border-gray-200 border-b-2 lg:min-w-2xs bg-white ${borderColor}`}>
       <div className="flex flex-col items-start justify-center gap-1">
         <h2 className="text-start text-xs font-medium text-gray-500 uppercase">
           {title}
         </h2>
-        <p className="text-base font-black">
+        <p className="text-lg font-black">
           {isValueCurrency
             ? value.toLocaleString("en-PH", {
                 style: "currency",
