@@ -1,11 +1,21 @@
-
 import {
   IconHomeFilled,
   IconArchiveFilled,
   IconClipboardListFilled,
   IconBrandFacebookFilled,
+  IconChartDotsFilled,
+  IconListDetailsFilled,
+  IconIconsFilled,
+  IconDoorExit,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
+
+//toast
+import { toast } from "sonner";
+
+//auth
+import { auth } from "../../config/firebase";
+import { signOut } from "firebase/auth";
 
 const navLinks = [
   { name: "Home", to: "/", icon: IconHomeFilled },
@@ -17,7 +27,26 @@ const navLinks = [
   },
 ];
 
-export default function Nav() {
+const adminNavLinks = [
+  { name: "Dashboard", to: "/admin/dashboard", icon: IconChartDotsFilled },
+  { name: "Orders", to: "/admin/orders", icon: IconListDetailsFilled },
+  { name: "Assets", to: "/admin/assets", icon: IconIconsFilled },
+];
+
+async function handleLogout(setUserRole, setUser) {
+  try {
+    await signOut(auth);
+    setUserRole("user");
+    setUser(null);
+    toast.success("Logout successful!", {
+      description: "You have been logged out successfully.",
+    });
+  } catch (error) {
+    console.error("Error signing out:", error);
+  }
+}
+
+export default function Nav({ userRole, setUserRole, setUser }) {
   return (
     <nav
       className="
@@ -36,21 +65,15 @@ export default function Nav() {
         lg:px-2 lg:py-8
       "
     >
-
-      {/* <div className="hidden h-14 w-full shrink-0 items-center justify-center lg:flex">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-800 text-xl font-bold text-white">
-          NF
-        </div>
-      </div> */}
-
       <div className="flex w-full items-center justify-between gap-1 lg:flex-col lg:justify-start lg:gap-2">
-        {navLinks.map(({ name, to, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === "/"}
-            className={({ isActive }) =>
-              `
+        {(userRole === "admin" ? adminNavLinks : navLinks).map(
+          ({ name, to, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === "/"}
+              className={({ isActive }) =>
+                `
                 group relative flex h-12 min-w-0 items-center
                 justify-center gap-2 rounded-full
                 transition-colors duration-200
@@ -64,28 +87,24 @@ export default function Nav() {
                     : "flex-1 px-1 text-neutral-600 hover:bg-green-50 lg:px-0 lg:text-neutral-300 lg:hover:bg-green-900 lg:hover:text-white"
                 }
               `
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon
-                  size={24}
-                  className="shrink-0"
-                  aria-hidden="true"
-                />
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon size={24} className="shrink-0" aria-hidden="true" />
 
-                <span
-                  className={`
+                  <span
+                    className={`
                     min-w-0 truncate text-xs font-semibold
                     ${isActive ? "block" : "hidden"}
                     lg:hidden
                   `}
-                >
-                  {name}
-                </span>
+                  >
+                    {name}
+                  </span>
 
-                <div
-                  className="
+                  <div
+                    className="
                     pointer-events-none absolute
                     left-[calc(100%+12px)] top-1/2
                     z-[100] hidden -translate-y-1/2
@@ -101,35 +120,54 @@ export default function Nav() {
                     lg:group-hover:translate-x-0
                     lg:group-hover:opacity-100
                   "
-                >
-                  {name}
-                </div>
-              </>
-            )}
-          </NavLink>
-        ))}
+                  >
+                    {name}
+                  </div>
+                </>
+              )}
+            </NavLink>
+          ),
+        )}
       </div>
 
-      <div className="mt-auto hidden w-full flex-col items-center gap-3 lg:flex">
-        <a
-          href="https://www.facebook.com/NaturalFeederPH"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Visit us on Facebook"
-          className="
+      {userRole === "admin" ? (
+        <div className="mt-auto hidden w-full flex-col items-center gap-3 lg:flex">
+          <button
+            aria-label="Logout"
+            title="Logout"
+            className="
+            flex h-12 w-full items-center justify-center
+            rounded-2xl text-white
+            hover:bg-red-800
+            hover:-translate-y-0.5
+            transition-all duration-300
+            cursor-pointer
+          "
+            onClick={() => handleLogout(setUserRole, setUser)}
+          >
+            <IconDoorExit size={24} />
+          </button>
+        </div>
+      ) : (
+        <div className="mt-auto hidden w-full flex-col items-center gap-3 lg:flex">
+          <a
+            href="https://www.facebook.com/NaturalFeederPH"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit us on Facebook"
+            className="
             flex h-12 w-full items-center justify-center
             rounded-2xl text-white
             transition-colors hover:bg-blue-600
             hover:text-white
           "
-        >
-          <IconBrandFacebookFilled size={24} />
-        </a>
+          >
+            <IconBrandFacebookFilled size={24} />
+          </a>
 
-        <span className="text-[10px] font-medium text-white">
-          Visit Us
-        </span>
-      </div>
+          <span className="text-[10px] font-medium text-white">Visit Us</span>
+        </div>
+      )}
     </nav>
   );
 }

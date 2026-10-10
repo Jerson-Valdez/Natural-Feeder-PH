@@ -3,20 +3,23 @@ import {
   IconArchive,
   IconCalendarCancel,
   IconActivityHeartbeat,
-  IconCalendarWeek,
+  IconChartAreaLine,
   IconTrendingUp,
   IconCashMinus,
   IconChartArrowsVertical,
   IconWallet,
   IconCashMove,
-  IconPercentage 
+  IconPercentage,
 } from "@tabler/icons-react";
 
 //components
 import DashboardCard from "../../components/cards/DashboardCard";
+import { toast } from "sonner";
 
 //hooks
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
 import {
   AreaChart,
@@ -41,7 +44,8 @@ export default function AdminDashboard() {
 
   const [years, setYears] = useState(["2023", "2024", "2025"]);
 
-  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
 
   const [fundsTrend, setFundsTrend] = useState([
     { month: "Jan", expense: 4000, revenue: 2400 },
@@ -58,6 +62,39 @@ export default function AdminDashboard() {
     { month: "Dec", expense: 1890, revenue: 4800 },
   ]);
 
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "orders"));
+
+        const productsArray = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setTotalOrders(productsArray.length);
+
+        const activeCount = productsArray.filter(
+          (order) => order.status === "active" || order.status === "pending"
+        ).length;
+        setActiveOrders(activeCount);
+
+        const cancelledCount = productsArray.filter(
+          (order) => order.status === "cancelled"
+        ).length;
+        setCancelledOrders(cancelledCount);
+
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to fetch Dashboard data. Please try again later.");
+      } finally {
+        // Note: Make sure you have const [isLoading, setIsLoading] = useState(true); declared above!
+        // setIsLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, [selectedMonth, selectedYear]);
+
   const dashboardCardsDataTop = [
     {
       title: "Active Orders",
@@ -65,6 +102,7 @@ export default function AdminDashboard() {
       icon: IconActivityHeartbeat,
       color: "green",
       isValueCurrency: false,
+      additionalClasses: "top",
     },
     {
       title: "Cancelled Orders",
@@ -72,6 +110,7 @@ export default function AdminDashboard() {
       icon: IconCalendarCancel,
       color: "red",
       isValueCurrency: false,
+      additionalClasses: "top",
     },
     {
       title: "Total Orders",
@@ -79,6 +118,7 @@ export default function AdminDashboard() {
       icon: IconArchive,
       color: "blue",
       isValueCurrency: false,
+      additionalClasses: "top",
     },
   ];
 
@@ -124,7 +164,7 @@ export default function AdminDashboard() {
       icon: IconPercentage,
       color: "green",
       isValueCurrency: false,
-    }
+    },
   ];
 
   const months = [
@@ -162,13 +202,24 @@ export default function AdminDashboard() {
           />
         ))}
       </div>
-      <div className="flex flex-row w-full items-center justify-start gap-2 shadow-lg rounded-2xl px-5 py-3 mt-2">
-        <IconCalendarWeek size={20} className="text-green-800" />
-        <p className="text-green-800 font-semibold text-sm">Viewing:</p>
+      <div className="flex flex-row w-full items-center justify-start gap-2 py-2">
+        <div className="flex-1 flex flex-col items-start justify-start">
+          <div className="flex flex-row items-center justify-start gap-2">
+            <IconChartAreaLine size={24} className="text-green-800" />
+            <h2 className="text-lg font-semibold text-green-800">
+              Overview of Funds
+            </h2>
+          </div>
+          <p className="text-sm text-gray-600">
+            {selectedMonth} {selectedYear}
+          </p>
+        </div>
         <select
           name="month"
           id="month"
-          className="bg-transparent text-green-800 font-semibold border border-gray-200 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-800 cursor-pointer"
+          className="bg-transparent text-green-800 font-semibold border border-gray-200 rounded-2xl shadow-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-800 cursor-pointer hover:-translate-y-0.5 hover:ring-1 transition-all duration-300"
+          defaultValue={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
         >
           {months.map((month) => (
             <option
@@ -183,7 +234,9 @@ export default function AdminDashboard() {
         <select
           name="year"
           id="year"
-          className="bg-transparent text-green-800 font-semibold border border-gray-200 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-800 cursor-pointer"
+          defaultValue={selectedYear}
+          className="bg-transparent text-green-800 font-semibold border border-gray-200 rounded-2xl shadow-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-800 cursor-pointer hover:-translate-y-0.5 hover:ring-1 transition-all duration-300"
+          onChange={(e) => setSelectedYear(e.target.value)}
         >
           {years.map((year) => (
             <option key={year} value={year} className="text-green-800 text-xs">
@@ -192,7 +245,7 @@ export default function AdminDashboard() {
           ))}
         </select>
       </div>
-      <div className="flex flex-row flex-wrap w-full items-center justify-start gap-2 mt-2">
+      <div className="flex flex-row flex-wrap w-full items-center justify-start gap-2">
         {dashboardCardsDataBottom.map((card, index) => (
           <DashboardCard
             key={index}
@@ -286,19 +339,19 @@ export default function AdminDashboard() {
                 wrapperStyle={{ fontSize: "12px", color: "#4b5563" }}
               />
               <Area
-                type="monotone"
+                type="linear"
                 dataKey="expense"
                 stroke="#991B1B"
-                strokeWidth={2}
+                strokeWidth={1}
                 fillOpacity={1}
                 fill="url(#expenseColor)"
                 mask="url(#fadeEdges)"
               />
               <Area
-                type="monotone"
+                type="linear"
                 dataKey="revenue"
                 stroke="#166534"
-                strokeWidth={1}
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#revenueColor)"
                 mask="url(#fadeEdges)"
