@@ -7,7 +7,7 @@ import CheckoutDialog from "../dialogs/CheckoutDialog";
 import { useState } from "react";
 
 //icons
-import { IconShoppingBag } from "@tabler/icons-react";
+import { IconShoppingBag, IconArchiveFilled } from "@tabler/icons-react";
 
 //context
 import { useContext } from "react";
@@ -140,7 +140,7 @@ export default function Catalog({
             <>
               <SecondaryButton
                 icon={<IconShoppingBag size={18} />}
-                text=""
+                text="Add to Cart"
                 action={() => {
                   const itemToSave = {
                     id: productName + selectedBundle.size,
@@ -168,6 +168,7 @@ export default function Catalog({
               />
               <PrimaryButton
                 text="Order Now"
+                icon={<IconArchiveFilled size={18} />}
                 action={() => {
                   setIsDialogOpen(true);
                 }}
@@ -197,10 +198,10 @@ export default function Catalog({
             <>
               <SecondaryButton
                 icon={<IconShoppingBag size={18} />}
-                text=""
+                text="Add to Cart"
                 isDisabled={true}
               />
-              <PrimaryButton text="Order Now" isDisabled={true} />
+              <PrimaryButton text="Order Now" icon={<IconArchiveFilled size={18} />} isDisabled={true} />
             </>
           )}
         </div>
