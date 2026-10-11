@@ -17,10 +17,12 @@ import {
 } from "@tabler/icons-react";
 import logo from "../../assets/Logo.svg";
 
-export default function Login({ setUserRole, setUser }) {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -37,28 +39,46 @@ export default function Login({ setUserRole, setUser }) {
 
   async function handleLogin(e) {
     e.preventDefault(); 
-
+    setIsLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password,
       );
-      
-      const user = userCredential.user;
-      setUser(user);
-      setUserRole("admin");
+
+      const tokenResult = await userCredential.user.getIdTokenResult(true);
+
+      if(tokenResult.claims.admin !== true){
+        await auth.signOut();
+        toast.error("You do not have admin privileges.");
+        return;
+      }
 
       toast.success("Login successful!", {
-        description: `Welcome back, ${user.email}!`,
+        description: `Welcome back, ${userCredential.user.email}!`,
       });
 
       navigate("/admin/dashboard"); 
 
     } catch (error) {
-      toast.error(`Login failed: ${error.message}`, {
-        description: "Please check your credentials and try again.",
-      });
+      if (error.code === "auth/too-many-requests") {
+        toast.error("Account temporarily locked", {
+          description: "Too many failed login attempts. Please wait a few minutes and try again.",
+        });
+      } 
+      else if (error.code === "auth/invalid-login-credentials" || error.code === "auth/invalid-credential") {
+        toast.error("Login failed", {
+          description: "Incorrect email or password.",
+        });
+      } 
+      else {
+        toast.error("Login failed", {
+          description: "Please check your connection and try again.",
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -92,6 +112,7 @@ export default function Login({ setUserRole, setUser }) {
           icon={<IconDoorEnter size={24} className="text-white" />}
           action={handleLogin}
           isDisabled={emailError !== "" || email === "" || password === ""}
+          isLoading={isLoading}
         />
       </div>
     </main>

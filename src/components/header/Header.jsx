@@ -4,8 +4,12 @@ import { IconShoppingBag } from "@tabler/icons-react";
 import { useContext } from "react";
 import { CartContext } from "../../context/CartContext";
 
-export default function Header({ setIsCartOpen, isCartOpen, userRole, email }) {
+//context
+import { useAuth } from "../../context/AuthContext";
+
+export default function Header({ setIsCartOpen, isCartOpen }) {
   const { cart } = useContext(CartContext);
+  const { user, isAdmin } = useAuth();
 
   return (
     <header
@@ -23,8 +27,8 @@ export default function Header({ setIsCartOpen, isCartOpen, userRole, email }) {
           Natural Feeder <span className="text-amber-900">PH</span>
         </h1>
       </div>
-      {userRole === "admin" ? (
-        <p className="text-sm text-gray-600">{email}</p>
+      {isAdmin ? (
+        <p className="text-sm text-gray-600">{user.email}</p>
       ) : (
         <button
           className={`flex flex-row items-center gap-2 p-2 rounded-full text-green-800 relative cursor-pointer active:scale-95 active:bg-green-800 active:text-white transition-all duration-150 ${isCartOpen ? "bg-green-800 text-white" : "hover:bg-green-800/20"}`}

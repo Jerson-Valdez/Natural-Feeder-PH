@@ -15,38 +15,41 @@ import { toast } from "sonner";
 
 //auth
 import { auth } from "../../config/firebase";
-import { signOut } from "firebase/auth";
 
-const navLinks = [
-  { name: "Home", to: "/", icon: IconHomeFilled },
-  { name: "Order Now", to: "/order-now", icon: IconArchiveFilled },
-  {
-    name: "Order History",
-    to: "/order-history",
-    icon: IconClipboardListFilled,
-  },
-];
+//context
+import { useAuth } from "../../context/AuthContext";
 
-const adminNavLinks = [
-  { name: "Dashboard", to: "/admin/dashboard", icon: IconChartDotsFilled },
-  { name: "Orders", to: "/admin/orders", icon: IconListDetailsFilled },
-  { name: "Assets", to: "/admin/assets", icon: IconIconsFilled },
-];
+export default function Nav() {
+  const { isAdmin } = useAuth();
 
-async function handleLogout(setUserRole, setUser) {
-  try {
-    await signOut(auth);
-    setUserRole("user");
-    setUser(null);
-    toast.success("Logout successful!", {
-      description: "You have been logged out successfully.",
-    });
-  } catch (error) {
-    console.error("Error signing out:", error);
+  const navLinks = [
+    { name: "Home", to: "/", icon: IconHomeFilled },
+    { name: "Order Now", to: "/order-now", icon: IconArchiveFilled },
+    {
+      name: "Order History",
+      to: "/order-history",
+      icon: IconClipboardListFilled,
+    },
+  ];
+
+  const adminNavLinks = [
+    { name: "Dashboard", to: "/admin/dashboard", icon: IconChartDotsFilled },
+    { name: "Orders", to: "/admin/orders", icon: IconListDetailsFilled },
+    { name: "Assets", to: "/admin/assets", icon: IconIconsFilled },
+  ];
+
+  async function handleLogout() {
+    try {
+      await auth.signOut();
+      toast.success("Logout successful!", {
+        description: "You have been logged out successfully.",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Logout failed. Please try again.");
+    }
   }
-}
 
-export default function Nav({ userRole, setUserRole, setUser }) {
   return (
     <nav
       className="
@@ -66,7 +69,7 @@ export default function Nav({ userRole, setUserRole, setUser }) {
       "
     >
       <div className="flex w-full items-center justify-between gap-1 lg:flex-col lg:justify-start lg:gap-2">
-        {(userRole === "admin" ? adminNavLinks : navLinks).map(
+        {(isAdmin ? adminNavLinks : navLinks).map(
           ({ name, to, icon: Icon }) => (
             <NavLink
               key={to}
@@ -130,7 +133,7 @@ export default function Nav({ userRole, setUserRole, setUser }) {
         )}
       </div>
 
-      {userRole === "admin" ? (
+      {isAdmin ? (
         <div className="mt-auto hidden w-full flex-col items-center gap-3 lg:flex">
           <button
             aria-label="Logout"
@@ -143,7 +146,7 @@ export default function Nav({ userRole, setUserRole, setUser }) {
             transition-all duration-300
             cursor-pointer
           "
-            onClick={() => handleLogout(setUserRole, setUser)}
+            onClick={() => handleLogout()}
           >
             <IconDoorExit size={24} />
           </button>

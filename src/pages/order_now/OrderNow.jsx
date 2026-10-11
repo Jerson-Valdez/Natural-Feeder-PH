@@ -45,7 +45,7 @@ export default function OrderNow() {
   if (isLoading) {
     return (
       <main className="page-container">
-      <div className="flex flex-col items-center justify-center gap-2 text-center">
+      <div className="flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold text-green-800">
           Make Your Order Now
         </h1>
