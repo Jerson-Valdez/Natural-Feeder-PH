@@ -1,5 +1,5 @@
 import notFoundImage from "../assets/notfound/notFound.jpg";
-import PrimaryButtonLink from "../components/buttons/PrimaryButtonLink";
+import { Link } from "react-router-dom";
 
 import { IconHomeFilled } from "@tabler/icons-react";
 
@@ -15,11 +15,9 @@ export default function NotFound() {
 
       <img src={notFoundImage} alt="Not Found" className="w-6xl lg:-mt-20" />
       <div className="flex flex-col items-center justify-center lg:-mt-10">
-        <PrimaryButtonLink
-          text="Go Back Home"
-          to="/"
-          icon={<IconHomeFilled size={24} className="text-white" />}
-        />
+        <Link to="/" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2">
+          <IconHomeFilled size={24} /> Go Back Home
+        </Link>
       </div>
     </main>
   );

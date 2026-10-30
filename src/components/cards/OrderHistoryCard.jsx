@@ -2,9 +2,13 @@ import { IconUserFilled, IconMapPinFilled , IconMessageCircleFilled, IconArchive
 import Status from '../status/Status';
 
 export default function OrderHistoryCard({ orderId, createdAt, orderBy, orderLocation, orderVia, orderModeTransport, orderItems, orderTotal, status }) {
+    const statusDescription = status === "pending" || status === "awaiting messenger chat" ? "Pending approval" : status;
     const color = () => {switch (status) {
         case "pending": return "yellow";
-        case "awaiting messenger chat": return "blue";
+        case "awaiting messenger chat": return "yellow";
+        case "active": return "blue";
+        case "completed": return "green";
+        case "cancelled": return "red";
         default: return "gray";
     }};
 
@@ -16,7 +20,7 @@ export default function OrderHistoryCard({ orderId, createdAt, orderBy, orderLoc
         <p className="text-sm text-gray-600">Date: {createdAt.toLocaleString()}</p>
         </div>
         <div className="flex flex-row lg:flex-col w-full items-end justify-between gap-2 mb-2">
-            <Status description={status} color={color()} />
+            <Status description={statusDescription} color={color()} />
             <p className="font-black text-green-800">{orderTotal.toLocaleString("en-PH", { style: "currency", currency: "PHP" })}</p>
         </div>
       </div>

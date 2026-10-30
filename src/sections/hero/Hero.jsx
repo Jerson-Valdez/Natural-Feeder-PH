@@ -6,14 +6,14 @@ import {
 } from "@tabler/icons-react";
 import hero from "../../assets/landing page assets/hero_vid.mp4";
 import Status from "../../components/status/Status";
-import PrimaryButtonLink from "../../components/buttons/PrimaryButtonLink";
-import SecondaryButtonLink from "../../components/buttons/SecondaryButtonLink";
+import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 export default function Hero() {
   return (
     <section
       id="hero"
-      className="w-full flex flex-col flex-col-reverse justify-center items-center gap-4 py-20 min-md:flex-row"
+      className="w-full flex flex-col flex-col-reverse justify-center items-center gap-4 py-20 sm:px-10 min-md:flex-row bg-white rounded-2xl"
       data-aos="fade-right"
     >
       <div className="flex flex-col gap-2 justify-center items-center w-full min-sm:justify-start min-sm:items-start min-sm:w-1/2">
@@ -34,17 +34,12 @@ export default function Hero() {
           send your order directly on Messenger.
         </p>
         <div className="flex flex-row gap-2 py-4">
-          <PrimaryButtonLink
-            to="/order-now"
-            icon={<IconArchiveFilled size={20} />}
-            text="Order Now"
-          />
-          <SecondaryButtonLink
-            to="/#how-it-works"
-            icon={<IconProgressHelp size={20} />}
-            text="How It Works"
-            isHash={true}
-          />
+          <Link to="/order-now" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2">
+            <IconArchiveFilled size={20} /> Order Now
+          </Link>
+          <HashLink smooth to="/#how-it-works" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-amber-900 px-5 py-2.5 text-sm font-semibold text-amber-900 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-900 focus-visible:ring-offset-2">
+            <IconProgressHelp size={20} /> How It Works
+          </HashLink>
         </div>
         <div className="flex flex-row flex-wrap gap-4 justify-center">
           <div className="flex flex-row items-center gap-2 text-green-800 text-xs font-semibold">

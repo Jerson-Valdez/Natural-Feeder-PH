@@ -1,87 +1,30 @@
-import { IconTrash, IconSquareRoundedCheckFilled, IconSquareRounded } from "@tabler/icons-react";
-import Superworm from "../../assets/catalogs/superworm.jpg";
-import { useNavigate } from "react-router-dom";
-
-//context
+import { IconMinus, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useContext } from "react";
-import { CartContext } from "../../context/CartContext";
-
-//toast
 import { toast } from "sonner";
+import { CartContext } from "../../context/CartContext";
+import Superworm from "../../assets/catalogs/superworm.jpg";
 
-export default function CartItemCard({ item, removeFromCart, isSelected, toggleSelect }) {
-  const image = item.name === "superworm" ? Superworm : null;
-  const cost = item.quantity * item.price;
-  const navigate = useNavigate();
-
-  const { reduceCartItemQuantity, increaseCartItemQuantity } = useContext(CartContext);
+export default function CartItemCard({ item }) {
+  const { removeFromCart, reduceCartItemQuantity, increaseCartItemQuantity } = useContext(CartContext);
+  const image = item.image || (item.name?.toLowerCase().includes("superworm") ? Superworm : null);
+  const cost = Number(item.price || 0) * Number(item.quantity || 0);
 
   return (
-    <div
-      className={`flex items-center justify-between w-full rounded-2xl p-3 shadow-md border cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 ${
-        isSelected ? "bg-green-50 border-green-800" : "bg-white/80 border-white/40"
-      }`}
-      onClick={() => navigate("/order-now")}
-    >
-      <div className="flex items-center gap-3">
-        <button 
-          className={`transition-colors cursor-pointer active:scale-95 ${
-            isSelected ? "text-green-800" : "text-gray-300 hover:text-green-800"
-          }`} 
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            toggleSelect(item.id); 
-          }}
-        >
-          {isSelected ? <IconSquareRoundedCheckFilled size={26} /> : <IconSquareRounded size={26} />}
-        </button>
-        <img
-          src={image}
-          alt={item.name}
-          className="w-14 h-14 object-cover rounded-xl shadow-sm"
-        />
-
-        <div className="flex flex-col items-start text-left">
-          <h3 className="font-bold text-green-900 text-sm">{item.name}</h3>
-          <div className="flex flex-row items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm flex-1 max-w-3xs">
-            <button
-              className="w-10 h-full text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
-              onClick={() => reduceCartItemQuantity(item.cartItemId)}
-            >
-              -
-            </button>
-            <span className="flex-1 text-center text-gray-800">
-              {item.quantity}
-            </span>
-            <button
-              className="w-10 h-full text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
-              onClick={() => increaseCartItemQuantity(item.cartItemId)}
-            >
-              +
-            </button>
+    <article className="flex w-full items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+      {image ? <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" /> : <div aria-hidden="true" className="h-16 w-16 shrink-0 rounded-xl bg-green-50" />}
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-sm font-bold text-green-900">{item.name}</h3>
+        <p className="text-xs text-gray-500">{item.size} · {item.pieces} pcs{Number(item.freebies) > 0 ? ` + ${item.freebies} freebies` : ""}</p>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="inline-flex h-8 items-center overflow-hidden rounded-lg border border-gray-200">
+            <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => reduceCartItemQuantity(item.cartItemId)} className="h-full px-2 text-gray-600 hover:bg-gray-100"><IconMinus size={14} /></button>
+            <span className="min-w-7 text-center text-sm font-semibold text-gray-800">{item.quantity}</span>
+            <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => increaseCartItemQuantity(item.cartItemId)} className="h-full px-2 text-gray-600 hover:bg-gray-100"><IconPlus size={14} /></button>
           </div>
-          <p className="text-gray-500 text-[11px] font-medium mt-0.5">
-            {item.pieces * item.quantity} {item.freebies > 0 ? `+ ${item.freebies * item.quantity}` : ""} pcs • {item.size}
-          </p>
-          <p className="text-green-800 text-sm font-black mt-0.5">
-            {cost.toLocaleString("en-PH", {
-              style: "currency",
-              currency: "PHP",
-            })}
-          </p>
+          <span className="text-sm font-bold text-green-800">{cost.toLocaleString("en-PH", { style: "currency", currency: "PHP" })}</span>
         </div>
       </div>
-
-      <button
-        onClick={(e) => {
-            e.stopPropagation();
-            removeFromCart(item.cartItemId);
-            toast.success("Item removed from cart.");
-        }}
-        className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-colors cursor-pointer"
-      >
-        <IconTrash size={20} />
-      </button>
-    </div>
+      <button type="button" aria-label={`Remove ${item.name} from cart`} onClick={() => { removeFromCart(item.cartItemId); toast.success("Item removed from cart."); }} className="rounded-full p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"><IconTrash size={18} /></button>
+    </article>
   );
 }

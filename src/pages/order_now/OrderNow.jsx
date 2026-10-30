@@ -2,6 +2,7 @@
 import Catalog from "../../components/cards/Catalog";
 import superwormImg from "../../assets/catalogs/superworm.jpg";
 import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
+import { toast } from "sonner";
 
 //hooks
 import { useEffect, useState } from "react";

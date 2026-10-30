@@ -5,8 +5,9 @@ import {
   IconBrandFacebookFilled,
   IconChartDotsFilled,
   IconListDetailsFilled,
-  IconIconsFilled,
   IconDoorExit,
+  IconBug,
+  IconBuildingWarehouse,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
 
@@ -35,7 +36,8 @@ export default function Nav() {
   const adminNavLinks = [
     { name: "Dashboard", to: "/admin/dashboard", icon: IconChartDotsFilled },
     { name: "Orders", to: "/admin/orders", icon: IconListDetailsFilled },
-    { name: "Assets", to: "/admin/assets", icon: IconIconsFilled },
+    { name: "Products", to: "/admin/products", icon: IconBug },
+    { name: "Assets", to: "/admin/assets", icon: IconBuildingWarehouse },
   ];
 
   async function handleLogout() {

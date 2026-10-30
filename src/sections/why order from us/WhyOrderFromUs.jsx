@@ -4,8 +4,7 @@ import {
   IconClockCheck ,
   IconArchiveFilled
 } from "@tabler/icons-react";
-import HowItWorksStep from "../../components/steps/HowItWorksStep";
-import PrimaryButtonLink from "../../components/buttons/PrimaryButtonLink";
+import { Link } from "react-router-dom";
 
 export default function WhyOrderFromUs() {
     const steps = [
@@ -52,11 +51,9 @@ export default function WhyOrderFromUs() {
             </div>
           ))}
         </div>
-        <PrimaryButtonLink 
-          text="Order Now"
-          href="/order"
-          icon={<IconArchiveFilled size={20} />}
-        />
+        <Link to="/order-now" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2">
+          <IconArchiveFilled size={20} /> Order Now
+        </Link>
     </section>
   );
 }

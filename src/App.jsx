@@ -13,10 +13,14 @@ import Home from "./pages/home/Home";
 import OrderNow from "./pages/order_now/OrderNow";
 import OrderHistory from "./pages/order_history/OrderHistory";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminInventory from "./pages/admin/AdminInventory";
+import AdminAssets from "./pages/admin/AdminAssets";
 import Layout from "./context/Layout";
 import Login from "./pages/login/Login";
 import NotFound from "./pages/NotFound";
 import AdminRoute from "./context/AdminRoute";
+import CustomerRoute from "./context/CustomerRoute";
 
 function App() {
   useEffect(() => {
@@ -37,14 +41,19 @@ function App() {
 
         {/* layout */}
         <Route element={<Layout />}>
-          {/* public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/order-now" element={<OrderNow />} />
-          <Route path="/order-history" element={<OrderHistory />} />
+          {/* Customer pages are hidden from authenticated administrators. */}
+          <Route element={<CustomerRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/order-now" element={<OrderNow />} />
+            <Route path="/order-history" element={<OrderHistory />} />
+          </Route>
 
           {/* private routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminInventory />} />
+            <Route path="/admin/assets" element={<AdminAssets />} />
           </Route>
         </Route>
 
