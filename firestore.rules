@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function validGuestOrder() {
+      return request.resource.data.keys().hasAll([
+          'items', 'totalPrice', 'orderBy', 'orderLocation',
+          'orderModeTransport', 'status', 'orderVia', 'createdAt'
+        ])
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.totalPrice is number
+        && request.resource.data.totalPrice >= 0
+        && request.resource.data.orderBy is string
+        && request.resource.data.orderBy.size() > 0
+        && request.resource.data.orderLocation is string
+        && request.resource.data.orderLocation.size() > 0
+        && request.resource.data.orderModeTransport in ['pickup', 'delivery']
+        && request.resource.data.status == 'pending'
+        && request.resource.data.orderVia is string;
+    }
+
+    match /orders/{orderId} {
+      // Guest order history currently uses locally stored document IDs.
+      // Public reads are therefore required by the current storefront flow.
+      allow read: if true;
+      allow create: if isAdmin() || validGuestOrder();
+      allow update, delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /expenses/{expenseId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /assets/{assetId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Deny access to any collection without an explicit rule above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

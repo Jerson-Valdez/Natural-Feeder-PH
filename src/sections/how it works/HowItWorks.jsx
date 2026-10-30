@@ -44,7 +44,7 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="w-full flex flex-col justify-center items-center gap-4 py-20 border-t border-green-800/20"
+      className="w-full flex flex-col justify-center items-center gap-4 py-20"
       data-aos="fade-right"
     >
       <div className="flex flex-col items-center justify-start text-center px-4">

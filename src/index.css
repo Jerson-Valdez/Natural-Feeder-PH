@@ -18,4 +18,5 @@ body {
   margin: 0;
   overflow-x: hidden;
   font-family: var(--font-family);
+  background-color: #f9f9f9;
 }

@@ -31,13 +31,15 @@ export default function Header({ setIsCartOpen, isCartOpen }) {
         <p className="text-sm text-gray-600">{user.email}</p>
       ) : (
         <button
+          type="button"
+          aria-label={`Open cart, ${cart.reduce((count, item) => count + Number(item.quantity || 0), 0)} items`}
           className={`flex flex-row items-center gap-2 p-2 rounded-full text-green-800 relative cursor-pointer active:scale-95 active:bg-green-800 active:text-white transition-all duration-150 ${isCartOpen ? "bg-green-800 text-white" : "hover:bg-green-800/20"}`}
           onClick={() => setIsCartOpen(!isCartOpen)}
         >
           <IconShoppingBag size={24} />
           {cart.length > 0 && (
             <span className="font-semibold text-xs absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
-              {cart.length}
+              {cart.reduce((count, item) => count + Number(item.quantity || 0), 0)}
             </span>
           )}
         </button>
