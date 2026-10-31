@@ -39,76 +39,79 @@ export default function AdminOrderCard({
           </p>
           <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
         </div>
-        <Status
-          description={
-            currentStatus === "awaiting_chat"
-              ? "Awaiting Messenger chat"
-              : currentStatus.replaceAll("_", " ")
-          }
-          color={statusColor}
-        />
+        <div className="flex flex-col flex-wrap items-end">
+          <Status
+            description={
+              currentStatus === "awaiting_chat"
+                ? "Awaiting Messenger chat"
+                : currentStatus.replaceAll("_", " ")
+            }
+            color={statusColor}
+          />
+          {currentStatus === "awaiting_chat" && (
+            <div className="mt-2 flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
+              <p className="mr-auto flex items-center text-xs font-medium text-amber-800">
+                This order is not approved or included in approved order totals
+                yet.
+              </p>
+              <button
+                type="button"
+                disabled={isUpdating}
+                onClick={() => onStatusChange("cancelled")}
+                className="inline-flex min-h-10 items-center gap-2 rounded-full border border-red-800 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50 hover:cursor-pointer"
+              >
+                <IconX size={17} /> Reject
+              </button>
+              <button
+                type="button"
+                disabled={isUpdating}
+                onClick={() => onStatusChange("preparing")}
+                className="inline-flex min-h-10 items-center gap-2 rounded-full bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-50 hover:cursor-pointer"
+              >
+                <IconCheck size={17} /> Approve & prepare
+              </button>
+            </div>
+          )}
+          {["preparing", "ready", "on_the_way"].includes(currentStatus) && (
+            <div className="mt-2 flex items-center justify-end gap-2">
+              <label
+                className="text-xs font-semibold text-gray-600"
+                htmlFor={`status-${order.id}`}
+              >
+                Next step
+              </label>
+              <select
+                id={`status-${order.id}`}
+                disabled={isUpdating}
+                defaultValue=""
+                onChange={(event) => {
+                  if (event.target.value) onStatusChange(event.target.value);
+                }}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 disabled:opacity-50 hover:cursor-pointer focus:border-green-800"
+              >
+                <option value="" disabled>
+                  Update status…
+                </option>
+                {currentStatus === "preparing" && (
+                  <option value="ready">Ready for pickup / delivery</option>
+                )}
+                {currentStatus === "ready" && (
+                  <>
+                    <option value="on_the_way">On the way</option>
+                    <option value="completed">Mark completed</option>
+                  </>
+                )}
+                {currentStatus === "on_the_way" && (
+                  <option value="completed">Mark completed</option>
+                )}
+                {currentStatus === "preparing" && (
+                  <option value="cancelled">Cancel order</option>
+                )}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
-      {currentStatus === "awaiting_chat" && (
-        <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
-          <p className="mr-auto flex items-center text-xs font-medium text-amber-800">
-            This order is not approved or included in approved order totals yet.
-          </p>
-          <button
-            type="button"
-            disabled={isUpdating}
-            onClick={() => onStatusChange("cancelled")}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-red-800 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50 hover:cursor-pointer"
-          >
-            <IconX size={17} /> Reject
-          </button>
-          <button
-            type="button"
-            disabled={isUpdating}
-            onClick={() => onStatusChange("preparing")}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-50 hover:cursor-pointer"
-          >
-            <IconCheck size={17} /> Approve & prepare
-          </button>
-        </div>
-      )}
-      {["preparing", "ready", "on_the_way"].includes(currentStatus) && (
-        <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
-          <label
-            className="text-xs font-semibold text-gray-600"
-            htmlFor={`status-${order.id}`}
-          >
-            Next step
-          </label>
-          <select
-            id={`status-${order.id}`}
-            disabled={isUpdating}
-            defaultValue=""
-            onChange={(event) => {
-              if (event.target.value) onStatusChange(event.target.value);
-            }}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 disabled:opacity-50"
-          >
-            <option value="" disabled>
-              Update status…
-            </option>
-            {currentStatus === "preparing" && (
-              <option value="ready">Ready for pickup / delivery</option>
-            )}
-            {currentStatus === "ready" && (
-              <>
-                <option value="on_the_way">On the way</option>
-                <option value="completed">Mark completed</option>
-              </>
-            )}
-            {currentStatus === "on_the_way" && (
-              <option value="completed">Mark completed</option>
-            )}
-            {currentStatus === "preparing" && (
-              <option value="cancelled">Cancel order</option>
-            )}
-          </select>
-        </div>
-      )}
       <div className="mt-3 border-t border-gray-100 pt-3">
         <p className="mb-1 text-xs font-semibold uppercase text-gray-500">
           Items
@@ -120,22 +123,22 @@ export default function AdminOrderCard({
             </span>
           ))}
         </div>
-        <p className="mt-2 text-right font-bold text-green-800">
-          {Number(order.totalPrice || 0).toLocaleString("en-PH", {
-            style: "currency",
-            currency: "PHP",
-          })}
-        </p>
-      </div>
-      <div className="mt-3 flex justify-end border-t border-gray-100 pt-3">
-        <button
-          type="button"
-          disabled={isDeleting || isUpdating}
-          onClick={onDelete}
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-red-50 disabled:opacity-50 hover:text-red-700 hover:cursor-pointer"
-        >
-          <IconTrash size={18} />
-        </button>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            disabled={isDeleting || isUpdating}
+            onClick={onDelete}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-red-50 disabled:opacity-50 hover:text-red-700 hover:cursor-pointer"
+          >
+            <IconTrash size={18} />
+          </button>
+          <p className="mt-2 text-right font-bold text-green-800">
+            {Number(order.totalPrice || 0).toLocaleString("en-PH", {
+              style: "currency",
+              currency: "PHP",
+            })}
+          </p>
+        </div>
       </div>
     </article>
   );

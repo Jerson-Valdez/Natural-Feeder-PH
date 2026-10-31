@@ -8,13 +8,16 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  addDoc,
 } from "firebase/firestore";
-import { IconRefresh, IconSearch } from "@tabler/icons-react";
+import { IconRefresh, IconSearch, IconPlus } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { db } from "../../config/firebase";
 import AdminOrderCard from "../../components/cards/AdminOrderCard";
 import AdminOrderCardSkeleton from "../../components/skeletons/AdminOrderCardSkeleton";
 import EmptyState from "../../components/EmptyState";
+import AdminCreateOrderDialog from "../../components/dialogs/AdminCreateOrderDialog";
+import FeedbackDialog from "../../components/dialogs/FeedbackDialog";
 
 function statusLabel(status) {
   if (status === "awaiting messenger chat") return "awaiting_chat";
@@ -35,7 +38,7 @@ function orderDate(value) {
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("awaiting_chat");
+  const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [productFilter, setProductFilter] = useState("");
   const [transportFilter, setTransportFilter] = useState("");
@@ -45,6 +48,10 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState("");
   const [deletingId, setDeletingId] = useState("");
+  const [products, setProducts] = useState([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   async function loadOrders() {
     setLoading(true);
@@ -68,6 +75,7 @@ export default function AdminOrders() {
 
   useEffect(() => {
     loadOrders();
+    getDocs(collection(db, "products")).then((snapshot) => setProducts(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })))).catch((error) => { console.error(error); toast.error("Could not load products for order creation."); });
   }, []);
 
   const tabCounts = useMemo(
@@ -178,16 +186,37 @@ export default function AdminOrders() {
   }
 
   async function deleteOrder(order) {
-    if (!window.confirm(`Permanently delete order ${order.id}? This cannot be undone.`)) return;
+    setFeedback({ variant: "confirm", title: "Delete this order?", message: `Order ${order.id} will be permanently deleted. This cannot be undone.`, confirmLabel: "Delete order", action: () => performDelete(order) });
+  }
+
+  async function performDelete(order) {
     setDeletingId(order.id);
     try {
       await deleteDoc(doc(db, "orders", order.id));
       setOrders((current) => current.filter((item) => item.id !== order.id));
-      toast.success("Order deleted.");
+      setFeedback({ variant: "info", title: "Order deleted", message: `Order ${order.id} was deleted.` });
     } catch (error) {
       console.error("Unable to delete order:", error);
       toast.error("Could not delete this order. Please try again.");
     } finally { setDeletingId(""); }
+  }
+
+  async function createOrder({ customer, location, transport, product, bundle, quantity }) {
+    const price = Number(bundle.price);
+    const totalPrice = price * quantity;
+    setCreating(true);
+    try {
+      const orderData = {
+        items: [{ id: product.id, name: product.productName, size: bundle.size, price, pieces: Number(bundle.pieces), freebies: product.productFreebies || "", quantity }],
+        totalPrice, orderBy: customer, orderLocation: location, orderModeTransport: transport,
+        status: "preparing", orderVia: "admin", createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        statusHistory: [{ status: "preparing", at: new Date().toISOString(), note: "Order created and approved by admin" }],
+      };
+      const created = await addDoc(collection(db, "orders"), orderData);
+      setOrders((current) => [{ id: created.id, ...orderData, createdAt: new Date() }, ...current]);
+      setActiveTab("preparing"); setIsCreateOpen(false); setFeedback({ variant: "info", title: "Order created", message: `Order ${created.id} was created and is now preparing.` });
+    } catch (error) { console.error("Unable to create admin order:", error); toast.error("Could not create this order."); }
+    finally { setCreating(false); }
   }
 
   return (
@@ -199,14 +228,17 @@ export default function AdminOrders() {
             Review incoming orders and keep their status up to date.
           </p>
         </div>
+        <div className="flex gap-2">
         <button
           type="button"
           onClick={loadOrders}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-md disabled:opacity-50 hover:cursor-pointer hover:-translate-y-0.5 hover:shadow-xl transition-all"
+          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-md disabled:opacity-50 hover:cursor-pointer hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300"
         >
           <IconRefresh size={18} /> Refresh
         </button>
+        <button type="button" onClick={() => setIsCreateOpen(true)} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-green-900 hover:shadow-xl hover:cursor-pointer hover:-translate-y-0.5 transition-all duration-300"><IconPlus size={18}/>Add order</button>
+        </div>
       </div>
       <div className="mt-2 w-full">
         <div
@@ -344,6 +376,8 @@ export default function AdminOrders() {
           ))
         )}
       </div>
+      {isCreateOpen && <AdminCreateOrderDialog products={products} onClose={() => setIsCreateOpen(false)} onSubmit={createOrder} saving={creating}/>}
+      <FeedbackDialog open={Boolean(feedback)} variant={feedback?.variant} title={feedback?.title} message={feedback?.message} confirmLabel={feedback?.confirmLabel} onConfirm={() => feedback?.action?.()} onClose={() => setFeedback(null)} busy={Boolean(deletingId)} />
     </main>
   );
 }

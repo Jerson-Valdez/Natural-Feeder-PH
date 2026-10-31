@@ -19,6 +19,7 @@ import { db } from "../../config/firebase";
 import InventoryProductCard from "../../components/cards/InventoryProductCard";
 import InventoryProductCardSkeleton from "../../components/skeletons/InventoryProductCardSkeleton";
 import EmptyState from "../../components/EmptyState";
+import FeedbackDialog from "../../components/dialogs/FeedbackDialog";
 
 const emptyProduct = () => ({
   productName: "",
@@ -38,6 +39,8 @@ export default function AdminInventory() {
   const [stockFilter, setStockFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   async function loadProducts() {
     setLoading(true);
@@ -78,12 +81,12 @@ export default function AdminInventory() {
       productName: product.productName || "",
       productDescription: product.productDescription || "",
       productImage: product.productImage || "superworm",
-      productFreebies: product.productFreebies ?? "",
+      productFreebies: String(product.productFreebies ?? ""),
       productBundleInfo: (product.productBundleInfo || []).length
         ? product.productBundleInfo.map((bundle) => ({
-            size: bundle.size ?? "",
-            price: bundle.price ?? "",
-            pieces: bundle.pieces ?? "",
+            size: String(bundle.size ?? ""),
+            price: String(bundle.price ?? ""),
+            pieces: String(bundle.pieces ?? ""),
           }))
         : [{ size: "", price: "", pieces: "" }],
       stock: product.stock ?? "",
@@ -187,7 +190,7 @@ export default function AdminInventory() {
               : product,
           ),
         );
-        toast.success("Product updated.");
+        setFeedback({ variant: "info", title: "Product updated", message: "Product details were saved." });
       } else {
         const created = await addDoc(collection(db, "products"), {
           ...payload,
@@ -197,7 +200,7 @@ export default function AdminInventory() {
           ...current,
           { id: created.id, ...payload, createdAt: new Date() },
         ]);
-        toast.success("Product added to inventory.");
+        setFeedback({ variant: "info", title: "Product added", message: "The product is now in your inventory." });
       }
       resetForm();
       setIsFormOpen(false);
@@ -209,23 +212,24 @@ export default function AdminInventory() {
     }
   }
 
-  async function removeProduct(product) {
-    if (
-      !window.confirm(
-        `Delete ${product.productName || "this product"} from inventory?`,
-      )
-    )
-      return;
+  function removeProduct(product) {
+    setPendingDelete(product);
+    setFeedback({ variant: "confirm", title: "Delete product?", message: `Delete ${product.productName || "this product"} from inventory? This cannot be undone.`, confirmLabel: "Delete product" });
+  }
+
+  async function confirmRemoveProduct() {
+    const product = pendingDelete;
+    if (!product) return;
     try {
       await deleteDoc(doc(db, "products", product.id));
       setProducts((current) =>
         current.filter((item) => item.id !== product.id),
       );
       if (editingId === product.id) resetForm();
-      toast.success("Product deleted.");
+      setFeedback({ variant: "info", title: "Product deleted", message: `${product.productName || "The product"} was removed from inventory.` });
     } catch (error) {
       console.error("Unable to delete product:", error);
-      toast.error("Could not delete this product. Please try again.");
+      setFeedback({ variant: "info", title: "Could not delete product", message: "Please try again. The product remains in inventory." });
     }
   }
 
@@ -243,7 +247,7 @@ export default function AdminInventory() {
             type="button"
             onClick={loadProducts}
             disabled={loading}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 hover:cursor-pointer"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 hover:cursor-pointer duration-300"
           >
             <IconRefresh size={17} /> Refresh
           </button>
@@ -257,7 +261,7 @@ export default function AdminInventory() {
                 openNewProduct();
               }
             }}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer duration-300"
           >
             <IconPlus size={17} className={`${isFormOpen && "rotate-45"}`} />{" "}
             {isFormOpen ? "Close form" : "Add product"}
@@ -513,6 +517,7 @@ export default function AdminInventory() {
           </div>
         )}
       </section>
+      <FeedbackDialog open={Boolean(feedback)} variant={feedback?.variant} title={feedback?.title} message={feedback?.message} confirmLabel={feedback?.confirmLabel} onConfirm={confirmRemoveProduct} onClose={() => { setFeedback(null); setPendingDelete(null); }} />
     </main>
   );
 }

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import AssetCard from "../../components/cards/AssetCard";
 import AssetPurchaseDialog from "../../components/dialogs/AssetPurchaseDialog";
 import AssetCardSkeleton from "../../components/skeletons/AssetCardSkeleton";
+import FeedbackDialog from "../../components/dialogs/FeedbackDialog";
 import EmptyState from "../../components/EmptyState";
 import { db } from "../../config/firebase";
 
@@ -84,6 +85,8 @@ export default function AdminAssets() {
   const [purchaseForm, setPurchaseForm] = useState(() =>
     emptyPurchaseForm(null),
   );
+  const [feedback, setFeedback] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   async function loadAssets() {
     setLoading(true);
@@ -384,16 +387,17 @@ export default function AdminAssets() {
   }
 
   async function deleteAsset(asset) {
-    if (
-      !window.confirm(
-        `Remove ${asset.name} from your asset register? Its expense history will be kept.`,
-      )
-    )
-      return;
+    setPendingDelete(asset);
+    setFeedback({ variant: "confirm", title: "Remove asset?", message: `Remove ${asset.name} from your asset register? Its expense history will be kept.`, confirmLabel: "Remove asset" });
+  }
+
+  async function confirmDeleteAsset() {
+    const asset = pendingDelete;
+    if (!asset) return;
     try {
       await deleteDoc(doc(db, "assets", asset.id));
       setAssets((current) => current.filter((item) => item.id !== asset.id));
-      toast.success("Asset removed. Related expense history was kept.");
+      setFeedback({ variant: "info", title: "Asset removed", message: "The asset was removed. Related expense history was kept." });
     } catch (error) {
       console.error("Unable to delete asset:", error);
       toast.error("Could not remove this asset. Please try again.");
@@ -419,7 +423,7 @@ export default function AdminAssets() {
             type="button"
             onClick={loadAssets}
             disabled={loading}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 hover:cursor-pointer"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-green-800 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 hover:cursor-pointer duration-300"
           >
             <IconRefresh size={17} /> Refresh
           </button>
@@ -433,7 +437,7 @@ export default function AdminAssets() {
                 openNewAsset();
               }
             }}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer duration-300"
           >
             <IconPlus size={17} className={`${isFormOpen && "rotate-45"}`} />{" "}
             {isFormOpen
@@ -647,7 +651,7 @@ export default function AdminAssets() {
             className="flex flex-wrap gap-2"
           >
             {[
-              { id: "all", label: "All" },
+              { id: "all", label: "All assets" },
               ...categoryOptions.map((category) => ({
                 id: category,
                 label: category,
@@ -682,9 +686,25 @@ export default function AdminAssets() {
           </div>
         ) : visibleAssets.length === 0 ? (
           <EmptyState
-            title={assets.length ? "No assets match these filters" : "No assets yet"}
-            description={assets.length ? "Try changing your search or category filter." : "Add an asset to track purchases and expenses."}
-            action={!assets.length && <button type="button" onClick={openNewAsset} className="min-h-11 rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-900">Add your first asset</button>}
+            title={
+              assets.length ? "No assets match these filters" : "No assets yet"
+            }
+            description={
+              assets.length
+                ? "Try changing your search or category filter."
+                : "Add an asset to track purchases and expenses."
+            }
+            action={
+              !assets.length && (
+                <button
+                  type="button"
+                  onClick={openNewAsset}
+                  className="min-h-11 rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-900"
+                >
+                  Add your first asset
+                </button>
+              )
+            }
           />
         ) : (
           <div className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -756,6 +776,7 @@ export default function AdminAssets() {
         onSubmit={buyMore}
         saving={saving}
       />
+      <FeedbackDialog open={Boolean(feedback)} variant={feedback?.variant} title={feedback?.title} message={feedback?.message} confirmLabel={feedback?.confirmLabel} onConfirm={confirmDeleteAsset} onClose={() => { setFeedback(null); setPendingDelete(null); }} />
     </main>
   );
 }
