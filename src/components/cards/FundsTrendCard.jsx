@@ -13,7 +13,7 @@ export default function FundsTrendCard({ data, year, isLoading = false }) {
   return (
     <section
       aria-busy={isLoading}
-      className="mt-4 flex min-h-80 w-full min-w-80 flex-col items-center justify-start rounded-2xl border border-gray-100 bg-white p-5 shadow-lg transition-shadow hover:shadow-xl"
+      className="mt-4 flex min-h-72 w-full min-w-0 flex-col items-center justify-start rounded-2xl border border-gray-100 bg-white p-4 shadow-lg transition-shadow hover:shadow-xl"
     >
       <div className="w-full">
         <h2 className="text-md font-bold text-green-800">
@@ -26,7 +26,7 @@ export default function FundsTrendCard({ data, year, isLoading = false }) {
       {isLoading ? (
         <div
           aria-hidden="true"
-          className="mt-4 flex h-96 w-full animate-pulse flex-col justify-between rounded-xl bg-gray-50 p-4"
+          className="mt-4 flex h-72 w-full animate-pulse flex-col justify-between rounded-xl bg-gray-50 p-4"
         >
           <div className="flex h-full items-end justify-between gap-2 border-b border-l border-gray-200 px-2">
             {[42, 58, 35, 70, 48, 82, 56, 68, 40, 75, 51, 63].map(
@@ -50,7 +50,7 @@ export default function FundsTrendCard({ data, year, isLoading = false }) {
           </div>
         </div>
       ) : (
-        <div className="h-96 w-full">
+        <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}

@@ -20,7 +20,7 @@ service cloud.firestore {
         && request.resource.data.orderLocation is string
         && request.resource.data.orderLocation.size() > 0
         && request.resource.data.orderModeTransport in ['pickup', 'delivery']
-        && request.resource.data.status == 'pending'
+        && request.resource.data.status == 'awaiting_chat'
         && request.resource.data.orderVia is string;
     }
 
@@ -29,7 +29,12 @@ service cloud.firestore {
       // Public reads are therefore required by the current storefront flow.
       allow read: if true;
       allow create: if isAdmin() || validGuestOrder();
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'statusHistory'])
+        && request.resource.data.status == 'cancelled'
+        && resource.data.status in ['awaiting_chat', 'pending', 'preparing']
+      );
+      allow delete: if isAdmin();
     }
 
     match /products/{productId} {
@@ -43,6 +48,12 @@ service cloud.firestore {
 
     match /assets/{assetId} {
       allow read, write: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      // Store links are public storefront configuration; only admins may change them.
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Deny access to any collection without an explicit rule above.

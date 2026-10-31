@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { IconArrowLeft, IconBrandMessengerFilled, IconShoppingBagCheck, IconX } from "@tabler/icons-react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import CartItemCard from "../cards/CartItemCard";
 import { CartContext } from "../../context/CartContext";
@@ -34,14 +34,17 @@ export default function CartDialog({ isOpen, onClose }) {
         orderBy: orderBy.trim(),
         orderLocation: orderLocation.trim(),
         orderModeTransport: transport,
-        status: "pending",
+        status: "awaiting_chat",
+        statusHistory: [{ status: "awaiting_chat", at: new Date().toISOString(), note: "Order submitted" }],
         orderVia: "messenger",
         createdAt: serverTimestamp(),
       });
       addOrderIdToHistory(orderRef.id);
       removeItemsFromCart(cart.map((item) => item.cartItemId));
 
-      const messengerUrl = new URL("https://m.me/valdez.jerson.5");
+      const settingsSnapshot = await getDoc(doc(db, "settings", "store"));
+      const savedMessengerLink = settingsSnapshot.exists() ? settingsSnapshot.data().messengerLink : "";
+      const messengerUrl = new URL(savedMessengerLink || "https://m.me/valdez.jerson.5");
       messengerUrl.searchParams.set("ref", `natural_feeder_order_${orderRef.id}`);
       toast.success(`Order recorded: ${orderRef.id}. Open Messenger to continue.`, {
         action: { label: "Open Messenger", onClick: () => window.open(messengerUrl.toString(), "_blank", "noopener,noreferrer") },

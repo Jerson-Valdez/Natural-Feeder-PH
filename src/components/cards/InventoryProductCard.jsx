@@ -1,6 +1,7 @@
 import { IconEdit, IconPhoto, IconTrash } from "@tabler/icons-react";
 import Status from "../status/Status";
 import superwormImage from "../../assets/catalogs/superworm.jpg";
+import beetles_pupaeImage from "../../assets/catalogs/beetles_pupae.jpg";
 
 function stockStatus(product) {
   const hasTrackedStock =
@@ -16,7 +17,11 @@ function stockStatus(product) {
 
 export default function InventoryProductCard({ product, onEdit, onDelete }) {
   const status = stockStatus(product);
-  const image = product.productImage === "superworm" ? superwormImage : null;
+  const image = {
+    superworm: superwormImage,
+    beetles_pupae: beetles_pupaeImage,
+    "beetles pupae": beetles_pupaeImage,
+  }[product.productImage] || null;
 
   return (
     <article className="flex h-full min-h-80 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">

@@ -2,6 +2,7 @@ import logo from "../../assets/Logo.svg";
 import { IconShoppingBag } from "@tabler/icons-react";
 
 import { useContext } from "react";
+import { useLocation } from "react-router-dom";
 import { CartContext } from "../../context/CartContext";
 
 //context
@@ -10,25 +11,47 @@ import { useAuth } from "../../context/AuthContext";
 export default function Header({ setIsCartOpen, isCartOpen }) {
   const { cart } = useContext(CartContext);
   const { user, isAdmin } = useAuth();
+  const { pathname } = useLocation();
+  const adminPageName = pathname.startsWith("/admin/orders")
+    ? "Orders"
+    : pathname.startsWith("/admin/products")
+      ? "Products"
+      : pathname.startsWith("/admin/assets")
+        ? "Assets"
+        : pathname.startsWith("/admin/settings")
+          ? "Settings"
+        : "Dashboard";
 
   return (
     <header
       className="fixed top-4 left-1/2 z-51 px-4 flex h-12 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 flex-row items-center justify-between rounded-full border-b border-white/20 bg-white/40 shadow-lg backdrop-blur-sm"
       data-aos="fade-down"
     >
-      <div className="flex flex-row items-center gap-2">
-        <img
-          src={logo}
-          alt="Natural Feeder PH"
-          loading="eager"
-          className="h-auto w-12"
-        />
-        <h1 className="text-lg font-black text-green-800">
-          Natural Feeder <span className="text-amber-900">PH</span>
-        </h1>
-      </div>
       {isAdmin ? (
-        <p className="text-sm text-gray-600">{user.email}</p>
+        <div className="flex flex-row items-center gap-2">
+          <img
+            src={logo}
+            alt="Natural Feeder PH"
+            loading="eager"
+            className="h-auto w-12"
+          />
+          <h1 className="text-lg font-black text-green-800">{adminPageName}</h1>
+        </div>
+      ) : (
+        <div className="flex flex-row items-center gap-2">
+          <img
+            src={logo}
+            alt="Natural Feeder PH"
+            loading="eager"
+            className="h-auto w-12"
+          />
+          <h1 className="text-lg font-black text-green-800">
+            Natural Feeder <span className="text-amber-900">PH</span>
+          </h1>
+        </div>
+      )}
+      {isAdmin ? (
+        <p className="sr-only">{user.email}</p>
       ) : (
         <button
           type="button"
@@ -39,7 +62,10 @@ export default function Header({ setIsCartOpen, isCartOpen }) {
           <IconShoppingBag size={24} />
           {cart.length > 0 && (
             <span className="font-semibold text-xs absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
-              {cart.reduce((count, item) => count + Number(item.quantity || 0), 0)}
+              {cart.reduce(
+                (count, item) => count + Number(item.quantity || 0),
+                0,
+              )}
             </span>
           )}
         </button>

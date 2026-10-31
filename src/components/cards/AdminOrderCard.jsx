@@ -1,4 +1,4 @@
-import { IconCheck, IconClock, IconX } from "@tabler/icons-react";
+import { IconCheck, IconX, IconTrash } from "@tabler/icons-react";
 import Status from "../status/Status";
 
 function formatDate(value) {
@@ -13,13 +13,15 @@ export default function AdminOrderCard({
   currentStatus,
   isUpdating,
   onStatusChange,
+  isDeleting,
+  onDelete,
 }) {
   const statusColor =
     currentStatus === "completed"
       ? "green"
       : currentStatus === "cancelled"
         ? "red"
-        : currentStatus === "active"
+        : ["preparing", "ready", "on_the_way"].includes(currentStatus)
           ? "blue"
           : "yellow";
 
@@ -39,21 +41,14 @@ export default function AdminOrderCard({
         </div>
         <Status
           description={
-            currentStatus === "pending" ? "Pending approval" : currentStatus
+            currentStatus === "awaiting_chat"
+              ? "Awaiting Messenger chat"
+              : currentStatus.replaceAll("_", " ")
           }
           color={statusColor}
-          icon={
-            currentStatus === "pending" ? (
-              <IconClock size={16} />
-            ) : currentStatus === "completed" ? (
-              <IconCheck size={16} />
-            ) : currentStatus === "cancelled" ? (
-              <IconX size={16} />
-            ) : undefined
-          }
         />
       </div>
-      {currentStatus === "pending" && (
+      {currentStatus === "awaiting_chat" && (
         <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
           <p className="mr-auto flex items-center text-xs font-medium text-amber-800">
             This order is not approved or included in approved order totals yet.
@@ -69,14 +64,14 @@ export default function AdminOrderCard({
           <button
             type="button"
             disabled={isUpdating}
-            onClick={() => onStatusChange("active")}
+            onClick={() => onStatusChange("preparing")}
             className="inline-flex min-h-10 items-center gap-2 rounded-full bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-50 hover:cursor-pointer"
           >
-            <IconCheck size={17} /> Approve order
+            <IconCheck size={17} /> Approve & prepare
           </button>
         </div>
       )}
-      {currentStatus === "active" && (
+      {["preparing", "ready", "on_the_way"].includes(currentStatus) && (
         <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
           <label
             className="text-xs font-semibold text-gray-600"
@@ -96,8 +91,21 @@ export default function AdminOrderCard({
             <option value="" disabled>
               Update status…
             </option>
-            <option value="completed">Mark completed</option>
-            <option value="cancelled">Cancel order</option>
+            {currentStatus === "preparing" && (
+              <option value="ready">Ready for pickup / delivery</option>
+            )}
+            {currentStatus === "ready" && (
+              <>
+                <option value="on_the_way">On the way</option>
+                <option value="completed">Mark completed</option>
+              </>
+            )}
+            {currentStatus === "on_the_way" && (
+              <option value="completed">Mark completed</option>
+            )}
+            {currentStatus === "preparing" && (
+              <option value="cancelled">Cancel order</option>
+            )}
           </select>
         </div>
       )}
@@ -118,6 +126,16 @@ export default function AdminOrderCard({
             currency: "PHP",
           })}
         </p>
+      </div>
+      <div className="mt-3 flex justify-end border-t border-gray-100 pt-3">
+        <button
+          type="button"
+          disabled={isDeleting || isUpdating}
+          onClick={onDelete}
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-red-50 disabled:opacity-50 hover:text-red-700 hover:cursor-pointer"
+        >
+          <IconTrash size={18} />
+        </button>
       </div>
     </article>
   );
