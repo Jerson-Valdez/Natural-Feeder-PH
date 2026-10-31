@@ -1,5 +1,5 @@
 import logo from "../../assets/Logo.svg";
-import { IconShoppingBag } from "@tabler/icons-react";
+import { IconShoppingBag, IconDoorExit } from "@tabler/icons-react";
 
 import { useContext } from "react";
 import { useLocation } from "react-router-dom";
@@ -8,9 +8,15 @@ import { CartContext } from "../../context/CartContext";
 //context
 import { useAuth } from "../../context/AuthContext";
 
+//toast
+import { toast } from "sonner";
+
+//auth
+import { auth } from "../../config/firebase";
+
 export default function Header({ setIsCartOpen, isCartOpen }) {
   const { cart } = useContext(CartContext);
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { pathname } = useLocation();
   const adminPageName = pathname.startsWith("/admin/orders")
     ? "Orders"
@@ -20,7 +26,19 @@ export default function Header({ setIsCartOpen, isCartOpen }) {
         ? "Assets"
         : pathname.startsWith("/admin/settings")
           ? "Settings"
-        : "Dashboard";
+          : "Dashboard";
+
+  async function handleLogout() {
+    try {
+      await auth.signOut();
+      toast.success("Logout successful!", {
+        description: "You have been logged out successfully.",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  }
 
   return (
     <header
@@ -51,7 +69,18 @@ export default function Header({ setIsCartOpen, isCartOpen }) {
         </div>
       )}
       {isAdmin ? (
-        <p className="sr-only">{user.email}</p>
+        <button
+          aria-label="Logout"
+          title="Logout"
+          className="flex flex-row items-center gap-2 py-2 px-3
+            rounded-full text-white
+            bg-red-800 lg:hidden
+          "
+          onClick={() => handleLogout()}
+        >
+          <IconDoorExit size={18} />
+          <span className="text-xs">Logout</span>
+        </button>
       ) : (
         <button
           type="button"
