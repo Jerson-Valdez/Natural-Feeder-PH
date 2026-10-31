@@ -10,14 +10,19 @@ import { db } from "../../config/firebase";
 
 const statusTabs = [
   { id: "all", label: "All" },
-  { id: "pending", label: "Pending" },
-  { id: "active", label: "Active" },
+  { id: "awaiting_chat", label: "Awaiting chat" },
+  { id: "preparing", label: "Preparing" },
+  { id: "ready", label: "Ready" },
+  { id: "on_the_way", label: "On the way" },
   { id: "completed", label: "Completed" },
   { id: "cancelled", label: "Cancelled" },
 ];
 
 function normalizedStatus(status) {
-  return status === "awaiting messenger chat" ? "pending" : status || "pending";
+  if (["awaiting messenger chat", "pending"].includes(status))
+    return "awaiting_chat";
+  if (status === "active") return "preparing";
+  return status || "awaiting_chat";
 }
 
 function getOrderDate(order) {
@@ -115,7 +120,7 @@ export default function OrderHistory() {
 
   return (
     <main className="page-container" aria-busy={isLoading}>
-      <div className="flex flex-col items-start justify-start gap-2 text-start">
+      <div className="flex flex-col w-full items-start justify-start gap-2 text-start">
         <h1 className="text-2xl font-bold text-green-800">
           Your Order History
         </h1>
@@ -126,27 +131,45 @@ export default function OrderHistory() {
 
       {!isLoading && orderHistory.length > 0 && (
         <>
+          <div className="mt-4 w-full sm:hidden">
+            <label className="flex min-h-11 w-full flex-col justify-center gap-0.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 shadow-lg focus-within:border-green-700 focus-within:ring-2 focus-within:ring-green-700/20">
+              Filter by status
+              <select
+                aria-label="Filter orders by status"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="w-full cursor-pointer bg-transparent text-sm font-semibold text-green-900 outline-none"
+              >
+                {statusTabs.map((tab) => (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.label} ({statusCounts[tab.id] || 0})
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
           <div
             role="group"
             aria-label="Filter orders by status"
-            className="mt-4 flex w-full flex-wrap items-center gap-2 rounded-2xl bg-white p-2 shadow-lg"
+            className="mt-4 hidden w-full flex-wrap items-center gap-2 rounded-2xl bg-white p-2 shadow-lg sm:flex"
           >
-              {statusTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  aria-pressed={statusFilter === tab.id}
-                  onClick={() => setStatusFilter(tab.id)}
-                  className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2 ${statusFilter === tab.id ? "bg-green-800 text-white shadow-md" : "text-gray-600 hover:bg-green-50 hover:text-green-900"}`}
+            {statusTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                aria-pressed={statusFilter === tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2 ${statusFilter === tab.id ? "bg-green-800 text-white shadow-md" : "text-gray-600 hover:bg-green-50 hover:text-green-900"}`}
+              >
+                {tab.label}
+                <span
+                  className={`min-w-6 rounded-full px-2 py-0.5 text-xs ${statusFilter === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}
                 >
-                  {tab.label}
-                  <span
-                    className={`min-w-6 rounded-full px-2 py-0.5 text-xs ${statusFilter === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}
-                  >
-                    {statusCounts[tab.id] || 0}
-                  </span>
-                </button>
-              ))}
+                  {statusCounts[tab.id] || 0}
+                </span>
+              </button>
+            ))}
           </div>
 
           <div className="mt-3 flex w-full flex-wrap items-center gap-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl">
@@ -233,9 +256,6 @@ export default function OrderHistory() {
           </div>
         ) : (
           <>
-            <p className="w-full text-sm text-gray-500">
-              Showing {visibleOrders.length} of {orderHistory.length} orders
-            </p>
             {visibleOrders.map((order) => (
               <OrderHistoryCard
                 key={order.id}
@@ -258,6 +278,7 @@ export default function OrderHistory() {
                 orderItems={order.items || []}
                 orderTotal={Number(order.totalPrice || 0)}
                 status={order.status}
+                statusHistory={order.statusHistory || []}
               />
             ))}
           </>

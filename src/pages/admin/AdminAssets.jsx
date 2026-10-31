@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import AssetCard from "../../components/cards/AssetCard";
 import AssetPurchaseDialog from "../../components/dialogs/AssetPurchaseDialog";
 import AssetCardSkeleton from "../../components/skeletons/AssetCardSkeleton";
+import EmptyState from "../../components/EmptyState";
 import { db } from "../../config/firebase";
 
 const categories = ["Equipment", "Breeding equipment", "Supplies", "Other"];
@@ -424,10 +425,22 @@ export default function AdminAssets() {
           </button>
           <button
             type="button"
-            onClick={openNewAsset}
+            onClick={() => {
+              if (isFormOpen) {
+                resetAssetForm();
+                setIsFormOpen(false);
+              } else {
+                openNewAsset();
+              }
+            }}
             className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer"
           >
-            <IconPlus size={17} /> Add asset
+            <IconPlus size={17} className={`${isFormOpen && "rotate-45"}`} />{" "}
+            {isFormOpen
+              ? editingId
+                ? "Cancel edit"
+                : "Close form"
+              : "Add asset"}
           </button>
         </div>
       </div>
@@ -454,7 +467,7 @@ export default function AdminAssets() {
       {isFormOpen && (
         <form
           onSubmit={saveAsset}
-          className="mt-4 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-xl"
+          className="mt-4 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-xl sm:p-6"
         >
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
@@ -473,12 +486,12 @@ export default function AdminAssets() {
                 resetAssetForm();
                 setIsFormOpen(false);
               }}
-              className="text-sm font-semibold text-gray-500 hover:text-gray-800"
+              className="text-sm font-semibold text-gray-500 hover:text-gray-800 hover:cursor-pointer"
             >
               Cancel
             </button>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <label className="text-sm font-medium text-gray-700">
               Asset name
               <input
@@ -487,7 +500,8 @@ export default function AdminAssets() {
                 onChange={(event) =>
                   setAssetForm({ ...assetForm, name: event.target.value })
                 }
-                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="e.g. Metal shelving rack"
+                className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/20"
               />
             </label>
             <label className="text-sm font-medium text-gray-700">
@@ -497,7 +511,7 @@ export default function AdminAssets() {
                 onChange={(event) =>
                   setAssetForm({ ...assetForm, category: event.target.value })
                 }
-                className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
+                className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/20"
               >
                 {categoryOptions.map((category) => (
                   <option key={category} value={category}>
@@ -522,7 +536,7 @@ export default function AdminAssets() {
                         quantity: event.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
+                    className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/20"
                   />
                 </label>
                 <label className="text-sm font-medium text-gray-700">
@@ -539,7 +553,7 @@ export default function AdminAssets() {
                         unitPrice: event.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
+                    className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/20"
                   />
                 </label>
                 <label className="text-sm font-medium text-gray-700">
@@ -557,8 +571,8 @@ export default function AdminAssets() {
                     className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
                   />
                 </label>
-                <div className="flex items-end text-sm font-semibold text-green-800">
-                  Purchase value:{" "}
+                <div className="flex min-h-11 items-center rounded-xl bg-green-50 px-3 text-sm font-semibold text-green-900 sm:col-span-2 xl:col-span-1">
+                  Estimated purchase value:{" "}
                   {peso(
                     (Number(assetForm.quantity) || 0) *
                       (Number(assetForm.unitPrice) || 0),
@@ -566,9 +580,10 @@ export default function AdminAssets() {
                 </div>
               </>
             )}
-            <label className="text-sm font-medium text-gray-700 sm:col-span-2">
+            <label className="text-sm font-medium text-gray-700 sm:col-span-2 xl:col-span-3">
               Description
-              <input
+              <textarea
+                rows={3}
                 value={assetForm.description}
                 onChange={(event) =>
                   setAssetForm({
@@ -577,22 +592,34 @@ export default function AdminAssets() {
                   })
                 }
                 placeholder="Purpose, supplier, or other notes"
-                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
+                className="mt-1 w-full resize-y rounded-xl border border-gray-200 px-3 py-2 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/20"
               />
             </label>
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-60"
-          >
-            <IconPlus size={18} />{" "}
-            {saving
-              ? "Saving…"
-              : editingId
-                ? "Save changes"
-                : "Add asset and log expense"}
-          </button>
+          <div className="mt-5 flex flex-col-reverse gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                resetAssetForm();
+                setIsFormOpen(false);
+              }}
+              className="min-h-11 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl hover:cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-60 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl hover:cursor-pointer"
+            >
+              <IconPlus size={18} />{" "}
+              {saving
+                ? "Saving…"
+                : editingId
+                  ? "Save changes"
+                  : "Add asset and log expense"}
+            </button>
+          </div>
         </form>
       )}
 
@@ -631,9 +658,14 @@ export default function AdminAssets() {
                 type="button"
                 aria-pressed={categoryFilter === tab.id}
                 onClick={() => setCategoryFilter(tab.id)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${categoryFilter === tab.id ? "bg-green-800 text-white shadow-md" : "bg-white text-gray-600 hover:bg-green-50 hover:text-green-900"}`}
+                className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2 ${categoryFilter === tab.id ? "bg-green-800 text-white shadow-md" : "text-gray-600 hover:bg-green-50 hover:text-green-900 hover:cursor-pointer"}`}
               >
-                {tab.label} ({categoryCounts[tab.id] || 0})
+                {tab.label}
+                <span
+                  className={`min-w-6 rounded-full px-2 py-0.5 text-xs ${categoryFilter === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}
+                >
+                  {categoryCounts[tab.id] || 0}
+                </span>
               </button>
             ))}
           </div>
@@ -649,22 +681,11 @@ export default function AdminAssets() {
             ))}
           </div>
         ) : visibleAssets.length === 0 ? (
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-lg">
-            <p className="font-semibold text-gray-700">
-              {assets.length
-                ? "No assets match these filters."
-                : "No assets have been added yet."}
-            </p>
-            {!assets.length && (
-              <button
-                type="button"
-                onClick={openNewAsset}
-                className="mt-3 rounded-full bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900"
-              >
-                Add your first asset
-              </button>
-            )}
-          </div>
+          <EmptyState
+            title={assets.length ? "No assets match these filters" : "No assets yet"}
+            description={assets.length ? "Try changing your search or category filter." : "Add an asset to track purchases and expenses."}
+            action={!assets.length && <button type="button" onClick={openNewAsset} className="min-h-11 rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-900">Add your first asset</button>}
+          />
         ) : (
           <div className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {visibleAssets.map((asset) => (

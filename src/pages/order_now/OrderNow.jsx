@@ -1,6 +1,7 @@
 //components and assets
 import Catalog from "../../components/cards/Catalog";
 import superwormImg from "../../assets/catalogs/superworm.jpg";
+import beetlesPupaeImg from "../../assets/catalogs/beetles_pupae.jpg";
 import CatalogSkeleton from "../../components/skeletons/CatalogSkeleton";
 import { toast } from "sonner";
 
@@ -17,6 +18,8 @@ export default function OrderNow() {
 
   const imageDictionary = {
     superworm: superwormImg,
+    beetles_pupae: beetlesPupaeImg,
+    "beetles pupae": beetlesPupaeImg,
     // "dubia": dubiaImg,
     // "mealworm": mealwormImg,
   };
@@ -46,7 +49,7 @@ export default function OrderNow() {
   if (isLoading) {
     return (
       <main className="page-container">
-      <div className="flex flex-col items-center justify-center text-center">
+      <div className="flex flex-col w-full items-start justify-start gap-2 text-start">
         <h1 className="text-2xl font-bold text-green-800">
           Make Your Order Now
         </h1>
@@ -66,7 +69,7 @@ export default function OrderNow() {
 
   return (
     <main className="page-container">
-      <div className="flex flex-col items-center justify-center gap-2 text-center">
+      <div className="flex flex-col w-full items-start justify-start gap-2 text-start">
         <h1 className="text-2xl font-bold text-green-800">
           Make Your Order Now
         </h1>

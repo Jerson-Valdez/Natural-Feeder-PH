@@ -8,6 +8,7 @@ import {
   IconDoorExit,
   IconBug,
   IconBuildingWarehouse,
+  IconSettings,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
 
@@ -38,6 +39,7 @@ export default function Nav() {
     { name: "Orders", to: "/admin/orders", icon: IconListDetailsFilled },
     { name: "Products", to: "/admin/products", icon: IconBug },
     { name: "Assets", to: "/admin/assets", icon: IconBuildingWarehouse },
+    { name: "Settings", to: "/admin/settings", icon: IconSettings },
   ];
 
   async function handleLogout() {
@@ -89,7 +91,7 @@ export default function Nav() {
                 ${
                   isActive
                     ? "flex-[1.5] bg-green-800 px-3 text-white lg:text-green-800 lg:bg-white"
-                    : "flex-1 px-1 text-neutral-600 hover:bg-green-50 lg:px-0 lg:text-neutral-300 lg:hover:bg-green-900 lg:hover:text-white"
+                    : "flex-1 px-1 text-green-800 lg:text-white hover:bg-green-50 lg:px-0 lg:hover:bg-green-900 lg:hover:text-white"
                 }
               `
               }

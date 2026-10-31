@@ -12,10 +12,12 @@ import "aos/dist/aos.css";
 import Home from "./pages/home/Home";
 import OrderNow from "./pages/order_now/OrderNow";
 import OrderHistory from "./pages/order_history/OrderHistory";
+import OrderDetail from "./pages/order_history/OrderDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminAssets from "./pages/admin/AdminAssets";
+import AdminSettings from "./pages/admin/AdminSettings";
 import Layout from "./context/Layout";
 import Login from "./pages/login/Login";
 import NotFound from "./pages/NotFound";
@@ -46,6 +48,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/order-now" element={<OrderNow />} />
             <Route path="/order-history" element={<OrderHistory />} />
+            <Route path="/order-history/:orderId" element={<OrderDetail />} />
           </Route>
 
           {/* private routes */}
@@ -54,6 +57,7 @@ function App() {
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminInventory />} />
             <Route path="/admin/assets" element={<AdminAssets />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
         </Route>
 

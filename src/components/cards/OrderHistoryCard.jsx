@@ -1,61 +1,60 @@
-import { IconUserFilled, IconMapPinFilled , IconMessageCircleFilled, IconArchiveFilled } from '@tabler/icons-react';
-import Status from '../status/Status';
+import { Link } from "react-router-dom";
+import Status from "../status/Status";
 
-export default function OrderHistoryCard({ orderId, createdAt, orderBy, orderLocation, orderVia, orderModeTransport, orderItems, orderTotal, status }) {
-    const statusDescription = status === "pending" || status === "awaiting messenger chat" ? "Pending approval" : status;
-    const color = () => {switch (status) {
-        case "pending": return "yellow";
-        case "awaiting messenger chat": return "yellow";
-        case "active": return "blue";
-        case "completed": return "green";
-        case "cancelled": return "red";
-        default: return "gray";
-    }};
+const labels = {
+  awaiting_chat: "Awaiting Messenger chat",
+  pending: "Awaiting Messenger chat",
+  preparing: "Preparing your order",
+  active: "Preparing your order",
+  ready: "Ready for pickup / delivery",
+  on_the_way: "On the way",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
 
+export default function OrderHistoryCard({
+  orderId,
+  createdAt,
+  orderItems = [],
+  orderTotal,
+  status,
+}) {
+  const label =
+    labels[status] || String(status || "awaiting_chat").replaceAll("_", " ");
+  const color =
+    status === "completed"
+      ? "green"
+      : status === "cancelled"
+        ? "red"
+        : ["preparing", "active", "ready", "on_the_way"].includes(status)
+          ? "blue"
+          : "yellow";
   return (
-    <div key={orderId} className="flex flex-col gap-2 w-full rounded-2xl p-3 shadow-lg border cursor-pointer hover:shadow-lg hover:-translate-y-0.5 bg-white/80 border-white/40 transition-all duration-300">
-      <div className="flex flex-col-reverse w-full lg:flex-row items-start lg:items-center justify-between">
+    <Link
+      to={`/order-history/${encodeURIComponent(orderId)}`}
+      className="block w-full rounded-2xl border border-white/40 bg-white/90 p-4 text-left shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h2 className="font-bold text-green-800">#{orderId}</h2>
-        <p className="text-sm text-gray-600">Date: {createdAt.toLocaleString()}</p>
+          <h2 className="font-bold text-green-800">Order #{orderId}</h2>
+          <p className="text-sm text-gray-600">{createdAt}</p>
         </div>
-        <div className="flex flex-row lg:flex-col w-full items-end justify-between gap-2 mb-2">
-            <Status description={statusDescription} color={color()} />
-            <p className="font-black text-green-800">{orderTotal.toLocaleString("en-PH", { style: "currency", currency: "PHP" })}</p>
-        </div>
-      </div>
-      <div>
-        {orderItems.map((item) => (
-            <div key={item.id} className="flex flex-row items-center justify-between w-full rounded-2xl p-2">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
-                    <p className="text-sm font-semibold text-green-800">{item.quantity} • {item.name}</p>
-                    <p className="text-xs text-gray-600">({item.size}) • {item.pieces} + {item.freebies} pcs</p>
-                </div>
-                <div>
-                    <p className="font-semibold text-gray-600">{(item.price * item.quantity).toLocaleString("en-PH", { style: "currency", currency: "PHP" })}</p>
-                </div>
-            </div>
-        ))}
-        <hr className="border-gray-300" />
-        <div className="flex flex-row flex-wrap items-center justify-start w-full rounded-2xl p-2 gap-5">
-            <div className="flex flex-row items-center gap-2">
-                <IconUserFilled className="text-gray-400" size={18}/>
-                <p className="text-xs text-gray-600">{orderBy}</p>
-            </div>
-            <div className="flex flex-row items-center gap-2">
-                <IconMapPinFilled className="text-gray-400" size={18}/>
-                <p className="text-xs text-gray-600">{orderLocation}</p>
-            </div>
-            <div className="flex flex-row items-center gap-2">
-                <IconMessageCircleFilled className="text-gray-400" size={18} />
-                <p className="text-xs text-gray-600">{orderVia}</p>
-            </div>
-            <div className="flex flex-row items-center gap-2">
-                <IconArchiveFilled className="text-gray-400" size={18} />
-                <p className="text-xs text-gray-600">{orderModeTransport}</p>
-            </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Status description={label} color={color} />
+          <strong className="text-green-800">
+            {Number(orderTotal).toLocaleString("en-PH", {
+              style: "currency",
+              currency: "PHP",
+            })}
+          </strong>
         </div>
       </div>
-    </div>
+      <p className="mt-3 text-sm text-gray-700">
+        {orderItems
+          .map((item) => `${item.quantity} × ${item.name}`)
+          .join(" · ")}
+      </p>
+      <p className="mt-1 text-xs text-gray-500">View full order details</p>
+    </Link>
   );
 }

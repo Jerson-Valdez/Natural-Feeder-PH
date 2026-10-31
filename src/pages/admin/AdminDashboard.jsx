@@ -13,6 +13,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { toast } from "sonner";
 import DashboardCard from "../../components/cards/DashboardCard";
 import FundsTrendCard from "../../components/cards/FundsTrendCard";
@@ -134,6 +135,30 @@ export default function AdminDashboard() {
   const monthExpenses = yearExpenses.filter(
     (expense) => getExpenseDate(expense)?.getMonth() === selectedMonthNumber,
   );
+  const bestSellingProducts = orders
+    .filter((order) => order.status === "completed")
+    .flatMap((order) => order.items || [])
+    .reduce((totals, item) => {
+      const name = item.name || item.productName || "Other products";
+      totals[name] = (totals[name] || 0) + Number(item.quantity || 0);
+      return totals;
+    }, {});
+  const productSales = Object.entries(bestSellingProducts)
+    .map(([name, quantity]) => ({ name, quantity }))
+    .sort((a, b) => b.quantity - a.quantity);
+  const productChartData =
+    productSales.length > 5
+      ? [
+          ...productSales.slice(0, 4),
+          {
+            name: "Other",
+            quantity: productSales
+              .slice(4)
+              .reduce((sum, item) => sum + item.quantity, 0),
+          },
+        ]
+      : productSales;
+  const chartColors = ["#166534", "#16a34a", "#4ade80", "#86efac", "#9ca3af"];
 
   const revenueMonth = monthOrders.reduce(
     (sum, order) =>
@@ -173,8 +198,8 @@ export default function AdminDashboard() {
       .reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0),
   }));
 
-  const activeOrders = orders.filter(
-    (order) => order.status === "active",
+  const activeOrders = orders.filter((order) =>
+    ["active", "preparing", "ready", "on_the_way"].includes(order.status),
   ).length;
   const pendingOrders = orders.filter((order) =>
     ["pending", "awaiting messenger chat"].includes(order.status),
@@ -183,7 +208,9 @@ export default function AdminDashboard() {
     (order) => order.status === "cancelled",
   ).length;
   const approvedOrders = orders.filter((order) =>
-    ["active", "completed"].includes(order.status),
+    ["active", "preparing", "ready", "on_the_way", "completed"].includes(
+      order.status,
+    ),
   ).length;
   const topCards = [
     {
@@ -352,11 +379,75 @@ export default function AdminDashboard() {
           ))
         )}
       </div>
-      <FundsTrendCard
-        data={fundsTrend}
-        year={selectedYear}
-        isLoading={isLoading}
-      />
+      <div className="grid w-full gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+        <FundsTrendCard
+          data={fundsTrend}
+          year={selectedYear}
+          isLoading={isLoading}
+        />
+        <section className="mt-4 flex min-h-72 flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-lg">
+          <h2 className="font-bold text-green-800">Best-selling products</h2>
+          <p className="text-xs text-gray-600">
+            Completed order quantities · all time
+          </p>
+          {isLoading ? (
+            <div className="mt-4 flex-1 animate-pulse rounded-xl bg-gray-50" />
+          ) : productChartData.length ? (
+            <>
+              <div className="mt-3 h-44 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={productChartData}
+                      dataKey="quantity"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="52%"
+                      outerRadius="82%"
+                      paddingAngle={2}
+                    >
+                      {productChartData.map((entry, index) => (
+                        <Cell
+                          key={entry.name}
+                          fill={chartColors[index % chartColors.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} pcs`, "Sold"]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <ul className="mt-2 space-y-2">
+                {productChartData.map((item, index) => (
+                  <li
+                    key={item.name}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <i
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor:
+                            chartColors[index % chartColors.length],
+                        }}
+                      />
+                      <span className="truncate text-gray-700">
+                        {item.name}
+                      </span>
+                    </span>
+                    <strong className="text-gray-900">{item.quantity}</strong>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="flex flex-1 items-center justify-center text-sm text-gray-500">
+              No completed product sales for this month.
+            </p>
+          )}
+        </section>
+      </div>
     </main>
   );
 }

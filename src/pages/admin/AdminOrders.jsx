@@ -7,23 +7,25 @@ import {
   serverTimestamp,
   updateDoc,
   doc,
+  deleteDoc,
 } from "firebase/firestore";
 import { IconRefresh, IconSearch } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { db } from "../../config/firebase";
 import AdminOrderCard from "../../components/cards/AdminOrderCard";
 import AdminOrderCardSkeleton from "../../components/skeletons/AdminOrderCardSkeleton";
+import EmptyState from "../../components/EmptyState";
 
 function statusLabel(status) {
-  return status === "awaiting messenger chat" ? "pending" : status || "pending";
+  if (status === "awaiting messenger chat") return "awaiting_chat";
+  if (status === "pending") return "awaiting_chat";
+  return status || "awaiting_chat";
 }
 
 function orderTab(status) {
-  if (status === "pending" || status === "awaiting messenger chat")
-    return "pending";
-  if (status === "cancelled") return "cancelled";
-  if (["active", "completed"].includes(status)) return "approved";
-  return "pending";
+  if (["pending", "awaiting messenger chat"].includes(status)) return "awaiting_chat";
+  if (status === "active") return "preparing";
+  return status || "awaiting_chat";
 }
 
 function orderDate(value) {
@@ -33,7 +35,7 @@ function orderDate(value) {
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("awaiting_chat");
   const [search, setSearch] = useState("");
   const [productFilter, setProductFilter] = useState("");
   const [transportFilter, setTransportFilter] = useState("");
@@ -42,6 +44,7 @@ export default function AdminOrders() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState("");
+  const [deletingId, setDeletingId] = useState("");
 
   async function loadOrders() {
     setLoading(true);
@@ -69,13 +72,8 @@ export default function AdminOrders() {
 
   const tabCounts = useMemo(
     () => ({
-      pending: orders.filter((order) => orderTab(order.status) === "pending")
-        .length,
-      approved: orders.filter((order) => orderTab(order.status) === "approved")
-        .length,
-      cancelled: orders.filter(
-        (order) => orderTab(order.status) === "cancelled",
-      ).length,
+      all: orders.length,
+      ...Object.fromEntries(["awaiting_chat", "preparing", "ready", "on_the_way", "completed", "cancelled"].map((status) => [status, orders.filter((order) => orderTab(order.status) === status).length])),
     }),
     [orders],
   );
@@ -96,7 +94,7 @@ export default function AdminOrders() {
     () =>
       orders
         .filter((order) => {
-          const matchesTab = orderTab(order.status) === activeTab;
+          const matchesTab = activeTab === "all" || orderTab(order.status) === activeTab;
           const haystack =
             `${order.orderBy || ""} ${order.orderLocation || ""} ${order.id}`.toLowerCase();
           const matchesSearch = haystack.includes(search.trim().toLowerCase());
@@ -148,17 +146,22 @@ export default function AdminOrders() {
   async function changeStatus(order, nextStatus) {
     const currentStatus = statusLabel(order.status);
     const allowedNextStatuses =
-      currentStatus === "pending"
-        ? ["active", "cancelled"]
-        : currentStatus === "active"
-          ? ["completed", "cancelled"]
-          : [];
+      ["awaiting_chat", "pending"].includes(currentStatus)
+        ? ["preparing", "cancelled"]
+        : currentStatus === "preparing"
+          ? ["ready", "cancelled"]
+          : currentStatus === "ready"
+            ? ["on_the_way", "completed"]
+            : currentStatus === "on_the_way"
+              ? ["completed"]
+              : [];
     if (!allowedNextStatuses.includes(nextStatus)) return;
     setUpdatingId(order.id);
     try {
       await updateDoc(doc(db, "orders", order.id), {
         status: nextStatus,
         updatedAt: serverTimestamp(),
+        statusHistory: [...(order.statusHistory || []), { status: nextStatus, at: new Date().toISOString() }],
       });
       setOrders((current) =>
         current.map((item) =>
@@ -172,6 +175,19 @@ export default function AdminOrders() {
     } finally {
       setUpdatingId("");
     }
+  }
+
+  async function deleteOrder(order) {
+    if (!window.confirm(`Permanently delete order ${order.id}? This cannot be undone.`)) return;
+    setDeletingId(order.id);
+    try {
+      await deleteDoc(doc(db, "orders", order.id));
+      setOrders((current) => current.filter((item) => item.id !== order.id));
+      toast.success("Order deleted.");
+    } catch (error) {
+      console.error("Unable to delete order:", error);
+      toast.error("Could not delete this order. Please try again.");
+    } finally { setDeletingId(""); }
   }
 
   return (
@@ -195,12 +211,16 @@ export default function AdminOrders() {
       <div className="mt-2 w-full">
         <div
           role="group"
-          aria-label="Order groups"
-          className="flex w-fit min-w-full items-center gap-2 rounded-2xl bg-white p-2 shadow-lg sm:min-w-0"
+          aria-label="Filter orders by status"
+          className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-white p-2 shadow-lg"
         >
           {[
-            { id: "pending", label: "Pending / Messenger" },
-            { id: "approved", label: "Approved / Final" },
+            { id: "all", label: "All orders" },
+            { id: "awaiting_chat", label: "Awaiting chat" },
+            { id: "preparing", label: "Preparing" },
+            { id: "ready", label: "Ready" },
+            { id: "on_the_way", label: "On the way" },
+            { id: "completed", label: "Completed" },
             { id: "cancelled", label: "Cancelled" },
           ].map((tab) => (
             <button
@@ -309,9 +329,7 @@ export default function AdminOrders() {
             ))}
           </div>
         ) : visibleOrders.length === 0 ? (
-          <p className="w-full p-6 text-center text-sm text-gray-500">
-            No orders in this tab.
-          </p>
+          <EmptyState title="No orders in this tab" description="Orders with this status will appear here." />
         ) : (
           visibleOrders.map((order) => (
             <AdminOrderCard
@@ -319,7 +337,9 @@ export default function AdminOrders() {
               order={order}
               currentStatus={statusLabel(order.status)}
               isUpdating={updatingId === order.id}
+              isDeleting={deletingId === order.id}
               onStatusChange={(nextStatus) => changeStatus(order, nextStatus)}
+              onDelete={() => deleteOrder(order)}
             />
           ))
         )}

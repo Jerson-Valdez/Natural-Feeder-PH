@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { db } from "../../config/firebase";
 import InventoryProductCard from "../../components/cards/InventoryProductCard";
 import InventoryProductCardSkeleton from "../../components/skeletons/InventoryProductCardSkeleton";
+import EmptyState from "../../components/EmptyState";
 
 const emptyProduct = () => ({
   productName: "",
@@ -63,6 +64,11 @@ export default function AdminInventory() {
   function resetForm() {
     setForm(emptyProduct());
     setEditingId("");
+  }
+
+  function openNewProduct() {
+    resetForm();
+    setIsFormOpen(true);
   }
 
   function startEdit(product) {
@@ -244,8 +250,12 @@ export default function AdminInventory() {
           <button
             type="button"
             onClick={() => {
-              setIsFormOpen((open) => !open);
-              if (isFormOpen && editingId) resetForm();
+              if (isFormOpen) {
+                resetForm();
+                setIsFormOpen(false);
+              } else {
+                openNewProduct();
+              }
             }}
             className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-900 hover:shadow-xl hover:cursor-pointer"
           >
@@ -293,12 +303,11 @@ export default function AdminInventory() {
                 onChange={(event) =>
                   setForm({ ...form, productImage: event.target.value })
                 }
-                placeholder="superworm"
+                placeholder="superworm or beetles_pupae"
                 className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-green-700"
               />
               <span className="text-xs font-normal text-gray-500">
-                Use a key available in the storefront image map, such as
-                “superworm”.
+                Use “superworm” or “beetles_pupae” to show a built-in product image.
               </span>
             </label>
             <label className="text-sm font-medium text-gray-700 sm:col-span-2">
@@ -353,7 +362,7 @@ export default function AdminInventory() {
                     ],
                   }))
                 }
-                className="inline-flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800"
+                className="inline-flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-lg hover:cursor-pointer"
               >
                 <IconPlus size={16} /> Add bundle
               </button>
@@ -416,7 +425,7 @@ export default function AdminInventory() {
                         ),
                       }))
                     }
-                    className="self-end rounded-lg p-2 text-red-700 hover:bg-red-50 disabled:opacity-30"
+                    className="self-end rounded-lg p-2 text-red-700 hover:bg-red-50 disabled:opacity-30 hover:cursor-pointer disabled:cursor-not-allowed transition-all"
                   >
                     <IconTrash size={18} />
                   </button>
@@ -427,7 +436,7 @@ export default function AdminInventory() {
           <button
             type="submit"
             disabled={saving}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-60"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-900 disabled:opacity-60 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl hover:cursor-pointer"
           >
             <IconPlus size={18} />{" "}
             {saving
@@ -439,14 +448,6 @@ export default function AdminInventory() {
         </form>
       )}
       <section className="mt-5 w-full">
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-bold text-green-900">Products</h2>
-            <p className="text-xs text-gray-500">
-              {visibleProducts.length} of {products.length} products
-            </p>
-          </div>
-        </div>
         <div className="mb-4 flex w-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between">
           <label className="flex min-w-56 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2">
             <IconSearch size={18} className="text-gray-400" />
@@ -473,9 +474,14 @@ export default function AdminInventory() {
                 type="button"
                 aria-pressed={stockFilter === tab.id}
                 onClick={() => setStockFilter(tab.id)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:cursor-pointer ${stockFilter === tab.id ? "bg-green-800 text-white shadow-md" : "bg-white text-gray-600 hover:bg-green-50 hover:text-green-900"}`}
+                className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:ring-offset-2 ${stockFilter === tab.id ? "bg-green-800 text-white shadow-md" : "text-gray-600 hover:bg-green-50 hover:text-green-900 hover:cursor-pointer"}`}
               >
-                {tab.label} ({stockCounts[tab.id]})
+                {tab.label}
+                <span
+                  className={`min-w-6 rounded-full px-2 py-0.5 text-xs ${stockFilter === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}
+                >
+                  {stockCounts[tab.id] || 0}
+                </span>
               </button>
             ))}
           </div>
@@ -491,13 +497,9 @@ export default function AdminInventory() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <p className="w-full text-center text-sm text-gray-500">
-            No products yet. Add one above.
-          </p>
+          <EmptyState title="No products yet" description="Add a product to start managing your catalog and stock." />
         ) : visibleProducts.length === 0 ? (
-          <p className="w-full text-center text-sm text-gray-500">
-            No products match these filters.
-          </p>
+          <EmptyState title="No products match these filters" description="Try changing your search or stock filter." />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleProducts.map((product) => (
