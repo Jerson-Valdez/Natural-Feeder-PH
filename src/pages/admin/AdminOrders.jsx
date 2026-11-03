@@ -272,7 +272,7 @@ export default function AdminOrders() {
           ))}
         </div>
       </div>
-      <div className="mt-2 grid w-full grid-cols-1 gap-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-3 grid w-full grid-cols-1 gap-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl sm:grid-cols-2 xl:grid-cols-4">
         <label className="flex min-h-11 min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 transition-colors focus-within:border-green-700 focus-within:ring-2 focus-within:ring-green-700/20 sm:col-span-2">
           <IconSearch size={18} className="shrink-0 text-gray-400" />
           <span className="sr-only">Search orders</span>
