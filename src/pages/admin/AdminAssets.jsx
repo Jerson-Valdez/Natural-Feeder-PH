@@ -627,14 +627,8 @@ export default function AdminAssets() {
         </form>
       )}
 
-      <section className="mt-5 w-full">
-        <div className="mb-3">
-          <h2 className="text-lg font-bold text-green-900">Asset register</h2>
-          <p className="text-xs text-gray-500">
-            Showing {visibleAssets.length} of {assets.length} assets
-          </p>
-        </div>
-        <div className="mb-4 flex w-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-xl lg:flex-row lg:items-center lg:justify-between">
+      <section className="mt-3 w-full">
+        <div className="mb-3 flex w-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-xl lg:flex-row lg:items-center lg:justify-between">
           <label className="flex min-w-56 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2">
             <IconSearch size={18} className="text-gray-400" />
             <span className="sr-only">Search assets</span>
@@ -721,7 +715,7 @@ export default function AdminAssets() {
         )}
       </section>
 
-      <section className="mt-7 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-xl">
+      <section className="mt-3 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-xl">
         <div className="mb-3">
           <h2 className="text-lg font-bold text-green-900">
             Recent asset purchases

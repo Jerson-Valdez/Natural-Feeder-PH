@@ -1,12 +1,12 @@
 import {
   IconActivityHeartbeat,
-  IconArchive,
   IconCalendarCancel,
   IconCashMinus,
   IconCashMove,
-  IconClock,
   IconChartAreaLine,
   IconChartArrowsVertical,
+  IconCheck,
+  IconClock,
   IconPercentage,
   IconTrendingUp,
   IconWallet,
@@ -199,18 +199,18 @@ export default function AdminDashboard() {
   }));
 
   const activeOrders = orders.filter((order) =>
-    ["active", "preparing", "ready", "on_the_way"].includes(order.status),
+    ["active", "preparing", "ready", "on_the_way"].includes(
+      String(order.status || "").toLowerCase(),
+    ),
   ).length;
   const pendingOrders = orders.filter((order) =>
-    ["pending", "awaiting messenger chat"].includes(order.status),
+    ["pending", "awaiting_chat", "awaiting messenger chat"].includes(
+      String(order.status || "").toLowerCase(),
+    ),
   ).length;
+  const completedOrders = orders.filter((order) => order.status === "completed").length;
   const cancelledOrders = orders.filter(
     (order) => order.status === "cancelled",
-  ).length;
-  const approvedOrders = orders.filter((order) =>
-    ["active", "preparing", "ready", "on_the_way", "completed"].includes(
-      order.status,
-    ),
   ).length;
   const topCards = [
     {
@@ -220,22 +220,22 @@ export default function AdminDashboard() {
       color: "green",
     },
     {
-      title: "Pending Approval",
+      title: "Pending · Awaiting Chat",
       value: pendingOrders,
       icon: IconClock,
       color: "yellow",
     },
     {
-      title: "Cancelled Orders",
+      title: "Completed",
+      value: completedOrders,
+      icon: IconCheck,
+      color: "green",
+    },
+    {
+      title: "Cancelled",
       value: cancelledOrders,
       icon: IconCalendarCancel,
       color: "red",
-    },
-    {
-      title: "Approved Orders",
-      value: approvedOrders,
-      icon: IconArchive,
-      color: "blue",
     },
   ];
   const financialCards = [
@@ -310,11 +310,11 @@ export default function AdminDashboard() {
           ))
         )}
       </div>
-      <section className="my-4 flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl">
+      <section className="my-2 flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl">
         <div>
           <div className="flex items-center gap-2">
             <IconChartAreaLine size={24} className="text-green-800" />
-            <h2 className="text-lg font-semibold text-green-800">
+            <h2 className="text-lg font-bold text-green-800">
               Overview of Funds
             </h2>
           </div>
@@ -443,7 +443,7 @@ export default function AdminDashboard() {
             </>
           ) : (
             <p className="flex flex-1 items-center justify-center text-sm text-gray-500">
-              No completed product sales for this month.
+              No completed product sales recorded yet.
             </p>
           )}
         </section>
